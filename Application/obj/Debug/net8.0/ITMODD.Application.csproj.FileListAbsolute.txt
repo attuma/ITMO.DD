@@ -1,0 +1,16 @@
+/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/bin/Debug/net8.0/ITMODD.Application.deps.json
+/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/bin/Debug/net8.0/ITMODD.Application.dll
+/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/bin/Debug/net8.0/ITMODD.Application.pdb
+/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/bin/Debug/net8.0/ITMODD.Domain.dll
+/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/bin/Debug/net8.0/ITMODD.Domain.pdb
+/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/obj/Debug/net8.0/ITMODD.Application.csproj.AssemblyReference.cache
+/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/obj/Debug/net8.0/ITMODD.Application.GeneratedMSBuildEditorConfig.editorconfig
+/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/obj/Debug/net8.0/ITMODD.Application.AssemblyInfoInputs.cache
+/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/obj/Debug/net8.0/ITMODD.Application.AssemblyInfo.cs
+/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/obj/Debug/net8.0/ITMODD.Application.csproj.CoreCompileInputs.cache
+/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/obj/Debug/net8.0/ITMODD.Application.sourcelink.json
+/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/obj/Debug/net8.0/ITMODD.Application.dll
+/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/obj/Debug/net8.0/refint/ITMODD.Application.dll
+/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/obj/Debug/net8.0/ITMODD.Application.pdb
+/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/obj/Debug/net8.0/ref/ITMODD.Application.dll
+/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/obj/Debug/net8.0/ITMODD.Application.csproj.CopyComplete

@@ -1,0 +1,238 @@
+{
+  "format": 1,
+  "restore": {
+    "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Maui/ITMODD.Maui.csproj": {}
+  },
+  "projects": {
+    "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/ITMODD.Application.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/ITMODD.Application.csproj",
+        "projectName": "ITMODD.Application",
+        "projectPath": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/ITMODD.Application.csproj",
+        "packagesPath": "/Users/redangry13/.nuget/packages/",
+        "outputPath": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/redangry13/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Domain/ITMODD.Domain.csproj": {
+                "projectPath": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Domain/ITMODD.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/opt/homebrew/Cellar/dotnet@8/8.0.125/libexec/sdk/8.0.125/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Domain/ITMODD.Domain.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Domain/ITMODD.Domain.csproj",
+        "projectName": "ITMODD.Domain",
+        "projectPath": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Domain/ITMODD.Domain.csproj",
+        "packagesPath": "/Users/redangry13/.nuget/packages/",
+        "outputPath": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Domain/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/redangry13/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/opt/homebrew/Cellar/dotnet@8/8.0.125/libexec/sdk/8.0.125/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Infrastructure/ITMODD.Infrastructure.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Infrastructure/ITMODD.Infrastructure.csproj",
+        "projectName": "ITMODD.Infrastructure",
+        "projectPath": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Infrastructure/ITMODD.Infrastructure.csproj",
+        "packagesPath": "/Users/redangry13/.nuget/packages/",
+        "outputPath": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Infrastructure/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/redangry13/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/ITMODD.Application.csproj": {
+                "projectPath": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/ITMODD.Application.csproj"
+              },
+              "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Domain/ITMODD.Domain.csproj": {
+                "projectPath": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Domain/ITMODD.Domain.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/opt/homebrew/Cellar/dotnet@8/8.0.125/libexec/sdk/8.0.125/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Maui/ITMODD.Maui.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Maui/ITMODD.Maui.csproj",
+        "projectName": "ITMODD.Maui",
+        "projectPath": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Maui/ITMODD.Maui.csproj",
+        "packagesPath": "/Users/redangry13/.nuget/packages/",
+        "outputPath": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Maui/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/Users/redangry13/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/ITMODD.Application.csproj": {
+                "projectPath": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Application/ITMODD.Application.csproj"
+              },
+              "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Infrastructure/ITMODD.Infrastructure.csproj": {
+                "projectPath": "/Users/redangry13/Desktop/itmodd_project/ITMO.DD/Infrastructure/ITMODD.Infrastructure.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/opt/homebrew/Cellar/dotnet@8/8.0.125/libexec/sdk/8.0.125/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
