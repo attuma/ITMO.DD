@@ -1,19 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31903.59
+# Visual Studio Version 18
+VisualStudioVersion = 18.4.11626.88 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudentTracker.Maui", "src\Maui\Maui.csproj", "{84CD307F-3903-4503-BBA9-AF923DE739E6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Maui", "src\Maui\Maui.csproj", "{84CD307F-3903-4503-BBA9-AF923DE739E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudentTracker.Domain", "src\Domain\Domain.csproj", "{1614376D-DA85-47D5-8B71-35C54E182EF4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "src\Domain\Domain.csproj", "{1614376D-DA85-47D5-8B71-35C54E182EF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudentTracker.Application", "src\Application\Application.csproj", "{F2F53EC5-8DEB-4FB2-B910-F640D11C88DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "src\Application\Application.csproj", "{F2F53EC5-8DEB-4FB2-B910-F640D11C88DB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudentTracker.Infrastructure", "src\Infrastructure\Infrastructure.csproj", "{44BD58D3-2557-4366-8F3F-01C245B56554}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "src\Infrastructure\Infrastructure.csproj", "{44BD58D3-2557-4366-8F3F-01C245B56554}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StudentTracker.Tests", "src\Tests\Tests.csproj", "{B167D90B-5C53-49A3-9ED7-42DDBCA85A46}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "src\Tests\Tests.csproj", "{B167D90B-5C53-49A3-9ED7-42DDBCA85A46}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +27,7 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{84CD307F-3903-4503-BBA9-AF923DE739E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{84CD307F-3903-4503-BBA9-AF923DE739E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84CD307F-3903-4503-BBA9-AF923DE739E6}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 		{84CD307F-3903-4503-BBA9-AF923DE739E6}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{84CD307F-3903-4503-BBA9-AF923DE739E6}.Debug|x64.Build.0 = Debug|Any CPU
 		{84CD307F-3903-4503-BBA9-AF923DE739E6}.Debug|x86.ActiveCfg = Debug|Any CPU

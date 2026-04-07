@@ -1,4 +1,33 @@
+# Кэш компиляции и сборки
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+# Кэш MAUI
+maui-app.log
+
+# Настройки IDE и редакторов
+.vs/
 .idea/
-**/bin/
-**/obj/
+.vscode/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+
+# Файлы NuGet
+*.nuget.props
+*.nuget.targets
+project.assets.json
+project.nuget.cache
+*.nupkg
+
+# Тесты и логи
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.log
+
+# Системные файлы macOS
 .DS_Store
+.AppleDouble
+.LSOverride
+Icon
