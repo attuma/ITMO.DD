@@ -2,35 +2,86 @@ using StudentTracker.Domain.Common;
 
 namespace StudentTracker.Domain.Entities;
 
-//Класс для создания учеб дисцплины
-    
-public class Subject:BaseEntity
+public class Subject : BaseEntity
 {
-    public string Name { get; private set; }
+    public string SubjectName { get; private set; }
+    public string? Description { get; private set; }
+    public int? OwnerUserId { get; private set; }
+    public int? OwnerGroupId { get; private set; }
+    public bool IsArchived { get; private set; }
+    public bool IsDefault { get; private set; }
 
-    public string Description { get; private set; }
-
-    public Subject(string name, string? description)
+    private Subject()
     {
-        if(string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Subject name is required", nameof(name));
-        
-        Id = Guid.NewGuid();
-        Name = name;
-        Description = description;
-        
-
+        SubjectName = string.Empty;
     }
-    //метод Update нужен для изменения дисцплины 
-    public void  Update(string name, string description)
-    {
-        if(string.IsNullOrWhiteSpace(name))
-            throw new ArgumentException("Subject description is required", nameof(name));
-        
-        if(string.IsNullOrWhiteSpace(description))
-            throw new ArgumentException("Subject description is required", nameof(description));
-        Name = name ;
-        Description = description;  
 
+    public Subject(
+        string subjectName,
+        string? description,
+        int? ownerUserId,
+        int? ownerGroupId,
+        bool isDefault = false)
+    {
+        if (string.IsNullOrWhiteSpace(subjectName))
+            throw new ArgumentException("Subject name cannot be empty.", nameof(subjectName));
+
+        ValidateOwner(ownerUserId, ownerGroupId);
+
+        SubjectName = subjectName;
+        Description = description;
+        OwnerUserId = ownerUserId;
+        OwnerGroupId = ownerGroupId;
+        IsDefault = isDefault;
+        IsArchived = false;
+    }
+
+    public static Subject CreateForUser(string subjectName, string? description, int ownerUserId, bool isDefault = false)
+    {
+        if (ownerUserId <= 0)
+            throw new ArgumentOutOfRangeException(nameof(ownerUserId));
+
+        return new Subject(subjectName, description, ownerUserId, null, isDefault);
+    }
+
+    public static Subject CreateForGroup(string subjectName, string? description, int ownerGroupId)
+    {
+        if (ownerGroupId <= 0)
+            throw new ArgumentOutOfRangeException(nameof(ownerGroupId));
+
+        return new Subject(subjectName, description, null, ownerGroupId);
+    }
+
+    public void Archive()
+    {
+        IsArchived = true;
+    }
+
+    public void Rename(string newName)
+    {
+        if (string.IsNullOrWhiteSpace(newName))
+            throw new ArgumentException("Subject name cannot be empty.", nameof(newName));
+
+        SubjectName = newName;
+    }
+
+    public void UpdateDescription(string? newDescription)
+    {
+        Description = newDescription;
+    }
+
+    private static void ValidateOwner(int? ownerUserId, int? ownerGroupId)
+    {
+        var hasUserOwner = ownerUserId.HasValue;
+        var hasGroupOwner = ownerGroupId.HasValue;
+
+        if (hasUserOwner == hasGroupOwner)
+            throw new ArgumentException("Subject must have either user owner or group owner.");
+
+        if (ownerUserId <= 0)
+            throw new ArgumentOutOfRangeException(nameof(ownerUserId));
+
+        if (ownerGroupId <= 0)
+            throw new ArgumentOutOfRangeException(nameof(ownerGroupId));
     }
 }
