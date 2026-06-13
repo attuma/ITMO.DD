@@ -6,6 +6,7 @@
 maui-app.log
 
 # Настройки IDE и редакторов
+.env
 .vs/
 .idea/
 .vscode/
