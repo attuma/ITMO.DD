@@ -11,3 +11,9 @@ public interface IUserRepository
     Task AddAsync(User user);
     Task SaveChangesAsync();
 }
+// Реализация будет находится в Infrastructure
+
+// GetByEmailAsync и GetByUsernameAsync для ищет по почте или имени 
+// ExistsByEmailAsync и ExistsByUsernameAsync проверяет занят ли почту или имя 
+// AddAsync добавляет нового пользователя 
+// SaveChangesAsync отправляет все изменения в БД

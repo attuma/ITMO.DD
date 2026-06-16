@@ -4,7 +4,7 @@ using StudentTracker.Domain.Entities;
 using StudentTracker.Domain.Enums;
 
 namespace StudentTracker.Application.Services;
-
+// просто сервис реги и входа тут все вместе смотри другие файлы 
 public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
