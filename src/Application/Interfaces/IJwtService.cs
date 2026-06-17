@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using StudentTracker.Domain.Entities;
 
-namespace StudentTracker.Application.Interfaces
+namespace StudentTracker.Application.Interfaces;
+
+public interface IJwtService
 {
-    internal interface IJwtService
-    {
-    }
+    string GenerateToken(User user);
 }
