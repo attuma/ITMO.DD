@@ -26,13 +26,11 @@ public class SubjectRepository : ISubjectRepository
         return await _db.Subjects.FirstOrDefaultAsync(s => s.Id == subjectId);
     }
 
-    // AddAsync: запоминает предмет в EF Core, SQL ещё не выполняется
     public async Task AddAsync(Subject subject)
     {
         await _db.Subjects.AddAsync(subject);
     }
 
-    // SaveChangesAsync: отправляет всё в БД одной транзакцией — BEGIN → INSERT → COMMIT
     public async Task SaveChangesAsync()
     {
         await _db.SaveChangesAsync();
