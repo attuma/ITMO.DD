@@ -67,6 +67,8 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
 builder.Services.AddScoped<ISubjectService, SubjectService>();
+builder.Services.AddScoped<IStudySessionRepository, StudySessionRepository>();
+builder.Services.AddScoped<IStudySessionService, StudySessionService>();
 
 var app = builder.Build();
 
@@ -95,7 +97,7 @@ app.MapPost("/login", async (LoginRequest request, IAuthService authService) =>
     return Results.Ok(result);
 });
 
-// POST /subjects — создать предмет (нужен JWT токен)
+// POST /subjects — создать предмет в
 app.MapPost("/subjects", async (SubjectRequest request, ISubjectService subjectService, ClaimsPrincipal user) =>
 {
     var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -103,11 +105,51 @@ app.MapPost("/subjects", async (SubjectRequest request, ISubjectService subjectS
     return Results.Created($"/subjects/{result.SubjectId}", result);
 }).RequireAuthorization();
 
-// GET /subjects — получить все предметы пользователя (нужен JWT токен)
+// GET /subjects — получить все предметы пользователя
 app.MapGet("/subjects", async (ISubjectService subjectService, ClaimsPrincipal user) =>
 {
     var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
     var result = await subjectService.GetUserSubjectsAsync(userId);
+    return Results.Ok(result);
+}).RequireAuthorization();
+
+// POST /sessions — начать учебную сессию 
+app.MapPost("/sessions", async (StartSessionRequest request, IStudySessionService sessionService, ClaimsPrincipal user) =>
+{
+    var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var result = await sessionService.StartAsync(request, userId);
+    return Results.Created($"/sessions/{result.Id}", result);
+}).RequireAuthorization();
+
+// POST /sessions/{id}/pause — поставить сессию на паузу 
+app.MapPost("/sessions/{id}/pause", async (int id, IStudySessionService sessionService, ClaimsPrincipal user) =>
+{
+    var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var result = await sessionService.PauseAsync(id, userId);
+    return Results.Ok(result);
+}).RequireAuthorization();
+
+// POST /sessions/{id}/resume — продолжить сессию после паузы 
+app.MapPost("/sessions/{id}/resume", async (int id, IStudySessionService sessionService, ClaimsPrincipal user) =>
+{
+    var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var result = await sessionService.ResumeAsync(id, userId);
+    return Results.Ok(result);
+}).RequireAuthorization();
+
+// POST /sessions/{id}/complete — завершить сессию 
+app.MapPost("/sessions/{id}/complete", async (int id, IStudySessionService sessionService, ClaimsPrincipal user) =>
+{
+    var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var result = await sessionService.CompleteAsync(id, userId);
+    return Results.Ok(result);
+}).RequireAuthorization();
+
+// GET /sessions — получить все сессии пользователя 
+app.MapGet("/sessions", async (IStudySessionService sessionService, ClaimsPrincipal user) =>
+{
+    var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var result = await sessionService.GetUserSessionsAsync(userId);
     return Results.Ok(result);
 }).RequireAuthorization();
 
