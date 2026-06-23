@@ -9,15 +9,21 @@ namespace StudentTracker.Application.Services;
 public class StudySessionService : IStudySessionService
 {
     private readonly IStudySessionRepository _studySessionRepository;
+    private readonly ISubjectRepository _subjectRepository;
 
-    public StudySessionService(IStudySessionRepository studySessionRepository)
+    public StudySessionService(IStudySessionRepository studySessionRepository, ISubjectRepository subjectRepository)
     {
         _studySessionRepository = studySessionRepository;
+        _subjectRepository = subjectRepository;
     }
 
     // StartAsync — создаёт новую сессию со статусом Active
     public async Task<SessionResponse> StartAsync(StartSessionRequest request, int userId)
     {
+        var subject = await _subjectRepository.GetByIdAsync(request.SubjectId);
+        if (subject == null || subject.OwnerUserId != userId)
+            throw new Exception("Subject not found or access denied");
+
         var session = new StudySession(userId, request.SubjectId);
 
         await _studySessionRepository.AddAsync(session);
