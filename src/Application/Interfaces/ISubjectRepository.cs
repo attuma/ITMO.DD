@@ -5,6 +5,7 @@ namespace StudentTracker.Application.Interfaces;
 public interface ISubjectRepository
 {
     Task<List<Subject>> GetByUserIdAsync(int userId);
+    Task<List<Subject>> GetByGroupIdAsync(int groupId);
     Task<Subject?> GetByIdAsync(int subjectId);
     Task AddAsync(Subject subject);
     Task SaveChangesAsync();

@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using StudentTracker.Application.DTO;
+using StudentTracker.Application.Exceptions;
 using StudentTracker.Application.Interfaces;
 using StudentTracker.Application.Services;
 using StudentTracker.Infrastructure.Persistence;
@@ -69,8 +71,34 @@ builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
 builder.Services.AddScoped<ISubjectService, SubjectService>();
 builder.Services.AddScoped<IStudySessionRepository, StudySessionRepository>();
 builder.Services.AddScoped<IStudySessionService, StudySessionService>();
+builder.Services.AddScoped<IGroupRepository, GroupRepository>();
+builder.Services.AddScoped<IGroupMembershipRepository, GroupMembershipRepository>();
+builder.Services.AddScoped<IGroupService, GroupService>();
+builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
+
+// Redis — кэш для лидерборда
+builder.Services.AddStackExchangeRedisCache(options =>
+    options.Configuration = builder.Configuration["Redis"]);
 
 var app = builder.Build();
+
+// глобальная обработка ошибок — превращает исключения в правильные HTTP коды
+app.UseExceptionHandler(errorApp => errorApp.Run(async context =>
+{
+    var exception = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+
+    var (status, message) = exception switch
+    {
+        NotFoundException e  => (404, e.Message),
+        ForbiddenException e => (403, e.Message),
+        BadRequestException e => (400, e.Message),
+        ConflictException e  => (409, e.Message),
+        _                    => (500, "Internal server error")
+    };
+
+    context.Response.StatusCode = status;
+    await context.Response.WriteAsJsonAsync(new { error = message });
+}));
 
 // Swagger только в режиме разработки
 if (app.Environment.IsDevelopment())
@@ -113,7 +141,23 @@ app.MapGet("/subjects", async (ISubjectService subjectService, ClaimsPrincipal u
     return Results.Ok(result);
 }).RequireAuthorization();
 
-// POST /sessions — начать учебную сессию 
+// POST /groups/{id}/subjects — создать предмет для группы
+app.MapPost("/groups/{id}/subjects", async (int id, SubjectRequest request, ISubjectService subjectService, ClaimsPrincipal user) =>
+{
+    var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var result = await subjectService.CreateForGroupAsync(request, id, userId);
+    return Results.Created($"/groups/{id}/subjects/{result.SubjectId}", result);
+}).RequireAuthorization();
+
+// GET /groups/{id}/subjects — получить предметы группы
+app.MapGet("/groups/{id}/subjects", async (int id, ISubjectService subjectService, ClaimsPrincipal user) =>
+{
+    var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var result = await subjectService.GetGroupSubjectsAsync(id, userId);
+    return Results.Ok(result);
+}).RequireAuthorization();
+
+// POST /sessions — начать учебную сессию
 app.MapPost("/sessions", async (StartSessionRequest request, IStudySessionService sessionService, ClaimsPrincipal user) =>
 {
     var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -150,6 +194,66 @@ app.MapGet("/sessions", async (IStudySessionService sessionService, ClaimsPrinci
 {
     var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
     var result = await sessionService.GetUserSessionsAsync(userId);
+    return Results.Ok(result);
+}).RequireAuthorization();
+
+// POST /groups — создать группу
+app.MapPost("/groups", async (CreateGroupRequest request, IGroupService groupService, ClaimsPrincipal user) =>
+{
+    var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var result = await groupService.CreateAsync(request, userId);
+    return Results.Created($"/groups/{result.Id}", result);
+}).RequireAuthorization();
+
+// POST /groups/{id}/join — вступить в группу
+app.MapPost("/groups/{id}/join", async (int id, IGroupService groupService, ClaimsPrincipal user) =>
+{
+    var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var result = await groupService.JoinAsync(new JoinGroupRequest(id), userId);
+    return Results.Ok(result);
+}).RequireAuthorization();
+
+// POST /groups/{id}/leave — выйти из группы
+app.MapPost("/groups/{id}/leave", async (int id, IGroupService groupService, ClaimsPrincipal user) =>
+{
+    var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    await groupService.LeaveAsync(id, userId);
+    return Results.NoContent();
+}).RequireAuthorization();
+
+// GET /groups — получить все группы пользователя
+app.MapGet("/groups", async (IGroupService groupService, ClaimsPrincipal user) =>
+{
+    var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var result = await groupService.GetUserGroupsAsync(userId);
+    return Results.Ok(result);
+}).RequireAuthorization();
+
+// GET /groups/{id}/members — получить участников группы
+app.MapGet("/groups/{id}/members", async (int id, IGroupService groupService, ClaimsPrincipal user) =>
+{
+    var result = await groupService.GetMembersAsync(id);
+    return Results.Ok(result);
+}).RequireAuthorization();
+
+// GET /leaderboard/daily — топ пользователей за сегодня
+app.MapGet("/leaderboard/daily", async (ILeaderboardService leaderboardService) =>
+{
+    var result = await leaderboardService.GetDailyLeaderboardAsync();
+    return Results.Ok(result);
+}).RequireAuthorization();
+
+// GET /leaderboard/weekly — топ пользователей за последние 7 дней
+app.MapGet("/leaderboard/weekly", async (ILeaderboardService leaderboardService) =>
+{
+    var result = await leaderboardService.GetWeeklyLeaderboardAsync();
+    return Results.Ok(result);
+}).RequireAuthorization();
+
+// GET /leaderboard/monthly — топ пользователей за последние 30 дней
+app.MapGet("/leaderboard/monthly", async (ILeaderboardService leaderboardService) =>
+{
+    var result = await leaderboardService.GetMonthlyLeaderboardAsync();
     return Results.Ok(result);
 }).RequireAuthorization();
 

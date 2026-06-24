@@ -1,4 +1,5 @@
 ﻿using StudentTracker.Application.DTO;
+using StudentTracker.Application.Exceptions;
 using StudentTracker.Application.Interfaces;
 using StudentTracker.Domain.Entities;
 using StudentTracker.Domain.Enums;
@@ -17,15 +18,14 @@ public class AuthService : IAuthService
     }
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
+        if (request.Username.Contains('@'))
+            throw new BadRequestException("Username cannot contain '@'.");
+
         if (await _userRepository.ExistsByEmailAsync(request.Email))
-        {
-            throw new Exception("Email already in use.");
-        }
+            throw new ConflictException("Email already in use.");
 
         if (await _userRepository.ExistsByUsernameAsync(request.Username))
-        {
-            throw new Exception("Username already in use.");
-        }
+            throw new ConflictException("Username already in use.");
 
         var user = new User
             (
@@ -56,31 +56,17 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
-
-        User? user;
-
-        if (request.Login.Contains("@"))
-        {
-            user = await _userRepository.GetByEmailAsync(request.Login);
-        }
-        else
-        {
-            user = await _userRepository.GetByUsernameAsync(request.Login);
-        }
+        var user = await _userRepository.GetByEmailAsync(request.Email);
 
         if (user == null)
-            throw new Exception("User not found");
+            throw new NotFoundException("User not found");
 
         if (!VerifyPassword(request.Password, user.PasswordHash))
-        {
-            throw new Exception("uncorrected password");
-        }
+            throw new BadRequestException("Incorrect password");
 
         var token = _jwtService.GenerateToken(user);
 
         return new AuthResponse(user.Id, user.UserName, user.Email, token);
-
-
     }
 
 
