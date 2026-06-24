@@ -69,6 +69,8 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
 builder.Services.AddScoped<ISubjectService, SubjectService>();
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddScoped<IStudySessionRepository, StudySessionRepository>();
 builder.Services.AddScoped<IStudySessionService, StudySessionService>();
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();
@@ -154,6 +156,22 @@ app.MapGet("/groups/{id}/subjects", async (int id, ISubjectService subjectServic
 {
     var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
     var result = await subjectService.GetGroupSubjectsAsync(id, userId);
+    return Results.Ok(result);
+}).RequireAuthorization();
+
+// POST /tasks — создать личную задачу
+app.MapPost("/tasks", async (TaskRequest request, ITaskService taskService, ClaimsPrincipal user) =>
+{
+    var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var result = await taskService.CreateAsync(request, userId);
+    return Results.Created($"/tasks/{result.TaskId}", result);
+}).RequireAuthorization();
+
+// GET /tasks — получить все задачи пользователя
+app.MapGet("/tasks", async (ITaskService taskService, ClaimsPrincipal user) =>
+{
+    var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var result = await taskService.GetUserTasksAsync(userId);
     return Results.Ok(result);
 }).RequireAuthorization();
 
