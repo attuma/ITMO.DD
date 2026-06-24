@@ -51,6 +51,18 @@ public class SubjectService : ISubjectService
         return new SubjectResponse(subject.Id, subject.SubjectName, subject.Description, subject.IsArchived);
     }
 
+    // ArchiveAsync — мягкое удаление: ставит IsArchived = true, данные остаются в БД
+    public async Task ArchiveAsync(int subjectId, int userId)
+    {
+        var subject = await _subjectRepository.GetByIdAsync(subjectId);
+        if (subject == null) throw new NotFoundException("Subject not found");
+
+        if (subject.OwnerUserId != userId) throw new ForbiddenException("Access denied");
+
+        subject.Archive();
+        await _subjectRepository.SaveChangesAsync();
+    }
+
     // GetGroupSubjectsAsync — возвращает все предметы группы, только для участников
     public async Task<List<SubjectResponse>> GetGroupSubjectsAsync(int groupId, int userId)
     {
