@@ -25,12 +25,8 @@ public class GroupService : IGroupService
     {
         var group = new Group(request.GroupName, request.Description, userId);
         await _groupRepository.AddAsync(group);
+        // триггер trg_add_group_owner автоматически добавит создателя в group_memberships
         await _groupRepository.SaveChangesAsync();
-
-        // создатель автоматически становится владельцем группы
-        var membership = new GroupMembership(group.Id, userId, GroupRole.GroupOwner);
-        await _groupMembershipRepository.AddAsync(membership);
-        await _groupMembershipRepository.SaveChangesAsync();
 
         return new GroupResponse(group.Id, group.GroupName, group.CreatedAt);
     }
