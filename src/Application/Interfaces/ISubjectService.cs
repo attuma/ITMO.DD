@@ -6,6 +6,8 @@ public interface ISubjectService
 {
     Task<SubjectResponse> CreateAsync(SubjectRequest request, int userId);
     Task<List<SubjectResponse>> GetUserSubjectsAsync(int userId);
+    Task<SubjectResponse> CreateForGroupAsync(SubjectRequest request, int groupId, int userId);
+    Task<List<SubjectResponse>> GetGroupSubjectsAsync(int groupId, int userId);
 }
 // CreateAsync создает предмет для пользователя
 // GetUserSubjectsAsync возвращает все предметы пользователя

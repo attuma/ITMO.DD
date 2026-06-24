@@ -18,9 +18,25 @@ public class StudySessionRepository : IStudySessionRepository
     public async Task<StudySession?> GetByIdAsync(int sessionId)
         => await _db.StudySessions.FirstOrDefaultAsync(s => s.Id == sessionId);
 
-    // SELECT * FROM study_sessions WHERE user_id = userId
+    // SELECT * FROM study_sessions WHERE user_id = userId ORDER BY started_at DESC
     public async Task<List<StudySession>> GetByUserIdAsync(int userId)
-        => await _db.StudySessions.Where(s => s.UserId == userId).ToListAsync();
+        => await _db.StudySessions
+            .Where(s => s.UserId == userId)
+            .OrderByDescending(s => s.StartedAt)
+            .ToListAsync();
+
+    // SELECT * FROM study_sessions WHERE user_id = userId AND session_status IN ('active','paused') LIMIT 1
+    public async Task<StudySession?> GetActiveByUserIdAsync(int userId)
+        => await _db.StudySessions.FirstOrDefaultAsync(s =>
+            s.UserId == userId &&
+            (s.SessionStatus == Domain.Enums.StudySessionStatus.Active ||
+             s.SessionStatus == Domain.Enums.StudySessionStatus.Paused));
+
+    // SELECT * FROM study_sessions WHERE session_status = 'completed' AND started_at >= from
+    public async Task<List<StudySession>> GetCompletedSinceAsync(DateTime from)
+        => await _db.StudySessions
+            .Where(s => s.SessionStatus == Domain.Enums.StudySessionStatus.Completed && s.StartedAt >= from)
+            .ToListAsync();
 
     public async Task AddAsync(StudySession session)
         => await _db.StudySessions.AddAsync(session);

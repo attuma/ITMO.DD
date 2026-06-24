@@ -52,6 +52,12 @@ public class UserRepository : IUserRepository
     // если что-то не так 
     // ROLLBACK;
 
+    // GetByIdAsync: SELECT * FROM users WHERE id = userId LIMIT 1
+    public async Task<User?> GetByIdAsync(int userId)
+    {
+        return await _db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+    }
+
     public async Task SaveChangesAsync()
     {
         await _db.SaveChangesAsync();

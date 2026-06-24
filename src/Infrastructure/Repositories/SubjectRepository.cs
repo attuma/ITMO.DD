@@ -20,6 +20,12 @@ public class SubjectRepository : ISubjectRepository
         return await _db.Subjects.Where(s => s.OwnerUserId == userId).ToListAsync();
     }
 
+    // SELECT * FROM subjects WHERE owner_group_id = groupId
+    public async Task<List<Subject>> GetByGroupIdAsync(int groupId)
+    {
+        return await _db.Subjects.Where(s => s.OwnerGroupId == groupId).ToListAsync();
+    }
+
     // SELECT * FROM subjects WHERE id = subjectId LIMIT 1
     public async Task<Subject?> GetByIdAsync(int subjectId)
     {

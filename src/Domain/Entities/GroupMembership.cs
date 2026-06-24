@@ -42,4 +42,10 @@ public class GroupMembership
 
         LeftAt = leaveTime;
     }
+
+    public void Rejoin()
+    {
+        JoinedAt = DateTime.UtcNow;
+        LeftAt = null;
+    }
 }
