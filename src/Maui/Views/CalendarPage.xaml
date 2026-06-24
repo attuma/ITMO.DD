@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:itmodd.ViewModels"
+             x:Class="itmodd.Views.CalendarPage"
+             x:Name="PageRoot"
+             Title="Календарь"
+             BackgroundColor="#000000"
+             Shell.BackgroundColor="#000000"
+             Shell.TitleColor="#FFFFFF"
+             Shell.ForegroundColor="#FFFFFF">
+
+    <ContentPage.Resources>
+
+        <!-- ПАЛИТРА (Apple Dark на чёрном) -->
+        <Color x:Key="Bg">#000000</Color>
+        <Color x:Key="Surface">#1C1C1E</Color>
+        <Color x:Key="Separator">#38383A</Color>
+        <Color x:Key="TextPrimary">#FFFFFF</Color>
+        <Color x:Key="TextSecondary">#8E8E93</Color>
+
+        <!-- смысловые акценты -->
+        <Color x:Key="Blue">#0A84FF</Color>
+        <Color x:Key="Green">#30D158</Color>
+        <Color x:Key="Red">#FF453A</Color>
+        <Color x:Key="Orange">#FF9F0A</Color>
+
+        <!-- карточка дня -->
+        <Style x:Key="DayCard" TargetType="Border">
+            <Setter Property="StrokeThickness" Value="1" />
+            <Setter Property="Padding" Value="6" />
+            <Setter Property="Margin" Value="3" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 14" />
+            <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
+            <Setter Property="Stroke" Value="{StaticResource Separator}" />
+            <!-- базовая мягкая тень -->
+            <Setter Property="Shadow">
+                <Shadow Brush="Black" Offset="0,3" Radius="8" Opacity="0.6" />
+            </Setter>
+            <Style.Triggers>
+                <!-- сегодня = оранжевая рамка + оранжевое свечение -->
+                <DataTrigger TargetType="Border" Binding="{Binding IsToday}" Value="True">
+                    <Setter Property="Stroke" Value="{StaticResource Orange}" />
+                    <Setter Property="StrokeThickness" Value="2" />
+                    <Setter Property="Shadow">
+                        <Shadow Brush="#FF9F0A" Offset="0,0" Radius="16" Opacity="0.55" />
+                    </Setter>
+                </DataTrigger>
+                <!-- выбранный день = белая рамка + белое свечение (важнее «сегодня») -->
+                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                    <Setter Property="Stroke" Value="{StaticResource TextPrimary}" />
+                    <Setter Property="StrokeThickness" Value="2" />
+                    <Setter Property="Shadow">
+                        <Shadow Brush="White" Offset="0,0" Radius="18" Opacity="0.6" />
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- карточка-счётчик / панель -->
+        <Style x:Key="StatCard" TargetType="Border">
+            <Setter Property="StrokeThickness" Value="1" />
+            <Setter Property="Padding" Value="10" />
+            <Setter Property="StrokeShape" Value="RoundRectangle 14" />
+            <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
+            <Setter Property="Stroke" Value="{StaticResource Separator}" />
+        </Style>
+
+        <!-- кнопки перелистывания месяца -->
+        <Style x:Key="NavButton" TargetType="Button">
+            <Setter Property="BackgroundColor" Value="{StaticResource Surface}" />
+            <Setter Property="TextColor" Value="{StaticResource TextPrimary}" />
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="WidthRequest" Value="48" />
+            <Setter Property="HeightRequest" Value="44" />
+            <Setter Property="BorderColor" Value="{StaticResource Separator}" />
+            <Setter Property="BorderWidth" Value="1" />
+        </Style>
+
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto, Auto, *, Auto" Padding="12" RowSpacing="12">
+
+        <!-- ШАПКА: кнопка назад, заголовок месяца, кнопка вперёд -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto">
+            <Button Grid.Column="0"
+                    Text="‹"
+                    Style="{StaticResource NavButton}"
+                    Command="{Binding PreviousMonthCommand}" />
+
+            <Label Grid.Column="1"
+                   Text="{Binding MonthTitle}"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource TextPrimary}" />
+
+            <Button Grid.Column="2"
+                    Text="›"
+                    Style="{StaticResource NavButton}"
+                    Command="{Binding NextMonthCommand}" />
+        </Grid>
+
+        <!-- КАРТОЧКИ-СЧЁТЧИКИ: сегодня / неделя / просрочено / выполнено -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
+
+            <!-- Сегодня -->
+            <Border Grid.Column="0" Style="{StaticResource StatCard}">
+                <HorizontalStackLayout Spacing="8">
+                    <Border WidthRequest="36" HeightRequest="36" Padding="0"
+                            BackgroundColor="#330A84FF" StrokeThickness="0" VerticalOptions="Center">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="10" /></Border.StrokeShape>
+                        <Label Text="📄" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                        <Label Text="Сегодня" FontSize="11" TextColor="{StaticResource TextSecondary}" />
+                        <Label Text="{Binding TodayText}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Blue}" />
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+            </Border>
+
+            <!-- На этой неделе -->
+            <Border Grid.Column="1" Style="{StaticResource StatCard}">
+                <HorizontalStackLayout Spacing="8">
+                    <Border WidthRequest="36" HeightRequest="36" Padding="0"
+                            BackgroundColor="#26FFFFFF" StrokeThickness="0" VerticalOptions="Center">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="10" /></Border.StrokeShape>
+                        <Label Text="📅" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                        <Label Text="На этой неделе" FontSize="11" TextColor="{StaticResource TextSecondary}" />
+                        <Label Text="{Binding WeekText}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource TextPrimary}" />
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+            </Border>
+
+            <!-- Просрочено -->
+            <Border Grid.Column="2" Style="{StaticResource StatCard}">
+                <HorizontalStackLayout Spacing="8">
+                    <Border WidthRequest="36" HeightRequest="36" Padding="0"
+                            BackgroundColor="#33FF453A" StrokeThickness="0" VerticalOptions="Center">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="10" /></Border.StrokeShape>
+                        <Label Text="🕐" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                        <Label Text="Просрочено" FontSize="11" TextColor="{StaticResource TextSecondary}" />
+                        <Label Text="{Binding OverdueText}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Red}" />
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+            </Border>
+
+            <!-- Выполнено -->
+            <Border Grid.Column="3" Style="{StaticResource StatCard}">
+                <HorizontalStackLayout Spacing="8">
+                    <Border WidthRequest="36" HeightRequest="36" Padding="0"
+                            BackgroundColor="#3330D158" StrokeThickness="0" VerticalOptions="Center">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="10" /></Border.StrokeShape>
+                        <Label Text="✅" FontSize="16" HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                    <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                        <Label Text="Выполнено" FontSize="11" TextColor="{StaticResource TextSecondary}" />
+                        <Label Text="{Binding DoneText}" FontSize="15" FontAttributes="Bold" TextColor="{StaticResource Green}" />
+                    </VerticalStackLayout>
+                </HorizontalStackLayout>
+            </Border>
+
+        </Grid>
+
+        <!-- СЕТКА ДНЕЙ: 42 ячейки в 7 колонок (день недели — внутри карточки) -->
+        <CollectionView Grid.Row="2" ItemsSource="{Binding Days}">
+            <CollectionView.ItemsLayout>
+                <GridItemsLayout Orientation="Vertical" Span="7" />
+            </CollectionView.ItemsLayout>
+
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <!-- карточка дня; бледность соседних месяцев = Opacity -->
+                    <Border Style="{StaticResource DayCard}"
+                            Opacity="{Binding IsCurrentMonth, Converter={StaticResource BoolToOpacity}}">
+
+                        <!-- тап по ячейке -> выбрать этот день -->
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer
+                                Command="{Binding Source={x:Reference PageRoot}, Path=BindingContext.SelectDayCommand}"
+                                CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+
+                        <VerticalStackLayout Spacing="3">
+
+                            <!-- ШАПКА КАРТОЧКИ: день недели + число + месяц -->
+                            <Label Text="{Binding WeekdayShort}"
+                                   FontSize="11"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource TextPrimary}"
+                                   HorizontalOptions="Center" />
+                            <Label Text="{Binding Date.Day}"
+                                   FontSize="20"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource TextPrimary}"
+                                   HorizontalOptions="Center" />
+                            <Label Text="{Binding MonthGenitive}"
+                                   FontSize="9"
+                                   TextColor="{StaticResource TextSecondary}"
+                                   HorizontalOptions="Center" />
+
+                            <!-- разделитель -->
+                            <BoxView HeightRequest="1"
+                                     Color="{StaticResource Separator}"
+                                     Margin="0,2" />
+
+                            <!-- задачи этого дня (только первые 1–2) -->
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding VisibleTasks}"
+                                                 Spacing="2">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate>
+                                        <!-- строка задачи: цветная точка (= предмет) + название -->
+                                        <HorizontalStackLayout Spacing="4">
+                                            <Border WidthRequest="8" HeightRequest="8" Padding="0"
+                                                    VerticalOptions="Center"
+                                                    BackgroundColor="{Binding Color, Converter={StaticResource StringToColor}}"
+                                                    StrokeThickness="0">
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="4" />
+                                                </Border.StrokeShape>
+                                            </Border>
+
+                                            <!-- название: ✓+зачёркнутое если выполнено; красное если просрочено -->
+                                            <Label Text="{Binding Title}"
+                                                   FontSize="11"
+                                                   TextColor="{StaticResource TextPrimary}"
+                                                   LineBreakMode="TailTruncation">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsDone}" Value="True">
+                                                        <Setter Property="Text" Value="{Binding Title, StringFormat='✓ {0}'}" />
+                                                        <Setter Property="TextDecorations" Value="Strikethrough" />
+                                                        <Setter Property="TextColor" Value="{StaticResource TextSecondary}" />
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsOverdue}" Value="True">
+                                                        <Setter Property="TextColor" Value="{StaticResource Red}" />
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </HorizontalStackLayout>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+
+                            <!-- бейдж-пилла «+N задача» -->
+                            <Border IsVisible="{Binding HasExtra}"
+                                    Padding="6,2"
+                                    HorizontalOptions="Start"
+                                    BackgroundColor="#26FFFFFF"
+                                    StrokeThickness="0">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                <Label Text="{Binding ExtraText}"
+                                       FontSize="9"
+                                       FontAttributes="Bold"
+                                       TextColor="{StaticResource TextPrimary}" />
+                            </Border>
+
+                            <!-- пустой день текущего месяца -->
+                            <VerticalStackLayout IsVisible="{Binding IsEmptyDay}"
+                                                 Spacing="2"
+                                                 HorizontalOptions="Center">
+                                <Label Text="Задач нет"
+                                       FontSize="10"
+                                       TextColor="{StaticResource TextSecondary}"
+                                       HorizontalOptions="Center" />
+                                <Label Text="🗓"
+                                       FontSize="14"
+                                       Opacity="0.3"
+                                       HorizontalOptions="Center" />
+                            </VerticalStackLayout>
+
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <!-- ПАНЕЛЬ ВЫБРАННОГО ДНЯ: появляется после тапа по дню -->
+        <Border Grid.Row="3"
+                IsVisible="{Binding HasSelectedDay}"
+                Style="{StaticResource StatCard}"
+                Padding="14"
+                MaximumHeightRequest="220">
+
+            <VerticalStackLayout Spacing="6">
+
+                <!-- заголовок: дата выбранного дня -->
+                <Label Text="{Binding SelectedDayTitle}"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}" />
+
+                <!-- список всех задач этого дня -->
+                <CollectionView ItemsSource="{Binding SelectedDayTasks}"
+                                HeightRequest="160">
+                    <CollectionView.EmptyView>
+                        <Label Text="На этот день задач нет"
+                               FontSize="13"
+                               TextColor="{StaticResource TextSecondary}" />
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <HorizontalStackLayout Spacing="8" Padding="0,4">
+                                <Border WidthRequest="12" HeightRequest="12" Padding="0"
+                                        VerticalOptions="Center"
+                                        BackgroundColor="{Binding Color, Converter={StaticResource StringToColor}}"
+                                        StrokeThickness="0">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="6" />
+                                    </Border.StrokeShape>
+                                </Border>
+
+                                <Label Text="{Binding Title}"
+                                       FontSize="14"
+                                       TextColor="{StaticResource TextPrimary}"
+                                       VerticalOptions="Center">
+                                    <Label.Triggers>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsDone}" Value="True">
+                                            <Setter Property="Text" Value="{Binding Title, StringFormat='✓ {0}'}" />
+                                            <Setter Property="TextDecorations" Value="Strikethrough" />
+                                            <Setter Property="TextColor" Value="{StaticResource TextSecondary}" />
+                                        </DataTrigger>
+                                        <DataTrigger TargetType="Label" Binding="{Binding IsOverdue}" Value="True">
+                                            <Setter Property="TextColor" Value="{StaticResource Red}" />
+                                        </DataTrigger>
+                                    </Label.Triggers>
+                                </Label>
+
+                                <Label Text="{Binding Deadline, StringFormat='{0:HH:mm}'}"
+                                       FontSize="12"
+                                       TextColor="{StaticResource TextSecondary}"
+                                       VerticalOptions="Center" />
+                            </HorizontalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+            </VerticalStackLayout>
+        </Border>
+
+    </Grid>
+
+</ContentPage>

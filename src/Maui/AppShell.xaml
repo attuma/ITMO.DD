@@ -4,7 +4,13 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:itmodd"
+    xmlns:views="clr-namespace:itmodd.Views"
     Title="itmodd">
+
+    <ShellContent
+        Title="Календарь"
+        ContentTemplate="{DataTemplate views:CalendarPage}"
+        Route="CalendarPage" />
 
     <ShellContent
         Title="Home"
