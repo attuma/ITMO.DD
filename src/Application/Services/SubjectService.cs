@@ -63,6 +63,15 @@ public class SubjectService : ISubjectService
         await _subjectRepository.SaveChangesAsync();
     }
 
+    // GetAccessibleSubjectsAsync — все предметы доступные пользователю (личные + групповые) через View
+    public async Task<List<SubjectResponse>> GetAccessibleSubjectsAsync(int userId)
+    {
+        var subjects = await _subjectRepository.GetAccessibleByUserIdAsync(userId);
+        return subjects
+            .Select(s => new SubjectResponse(s.Id, s.SubjectName, s.Description, s.IsArchived))
+            .ToList();
+    }
+
     // GetGroupSubjectsAsync — возвращает все предметы группы, только для участников
     public async Task<List<SubjectResponse>> GetGroupSubjectsAsync(int groupId, int userId)
     {

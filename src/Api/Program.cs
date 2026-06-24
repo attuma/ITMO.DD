@@ -141,6 +141,14 @@ app.MapGet("/subjects", async (ISubjectService subjectService, ClaimsPrincipal u
     return Results.Ok(result);
 }).RequireAuthorization();
 
+// GET /subjects/accessible — все предметы доступные пользователю (личные + групповые) через View
+app.MapGet("/subjects/accessible", async (ISubjectService subjectService, ClaimsPrincipal user) =>
+{
+    var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var result = await subjectService.GetAccessibleSubjectsAsync(userId);
+    return Results.Ok(result);
+}).RequireAuthorization();
+
 // DELETE /subjects/{id} — мягкое удаление предмета (IsArchived = true)
 app.MapDelete("/subjects/{id}", async (int id, ISubjectService subjectService, ClaimsPrincipal user) =>
 {

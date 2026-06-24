@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using StudentTracker.Application.Interfaces;
 using StudentTracker.Domain.Entities;
 using StudentTracker.Infrastructure.Persistence;
+using System.Data;
 
 namespace StudentTracker.Infrastructure.Repositories;
 
@@ -30,6 +31,19 @@ public class SubjectRepository : ISubjectRepository
     public async Task<Subject?> GetByIdAsync(int subjectId)
     {
         return await _db.Subjects.FirstOrDefaultAsync(s => s.Id == subjectId);
+    }
+
+    // читаем из View user_accessible_subjects — личные предметы и предметы групп пользователя
+    public async Task<List<Subject>> GetAccessibleByUserIdAsync(int userId)
+    {
+        return await _db.Subjects
+            .FromSqlRaw(@"
+                SELECT DISTINCT s.*
+                FROM user_accessible_subjects s
+                WHERE s.owner_user_id = {0}
+                   OR s.accessible_by_user_id = {0}
+            ", userId)
+            .ToListAsync();
     }
 
     public async Task AddAsync(Subject subject)
