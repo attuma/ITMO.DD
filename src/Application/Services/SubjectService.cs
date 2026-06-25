@@ -65,9 +65,7 @@ public class SubjectService : ISubjectService
     public async Task<List<SubjectResponse>> GetAccessibleSubjectsAsync(int userId)
     {
         var subjects = await _subjectRepository.GetAccessibleByUserIdAsync(userId);
-        return subjects
-            .Select(s => new SubjectResponse(s.Id, s.SubjectName, s.Description, s.IsArchived))
-            .ToList();
+        return subjects.Select(Map).ToList();
     }
 
     // GetGroupSubjectsAsync — возвращает все предметы группы, только для участников
