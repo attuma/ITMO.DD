@@ -15,4 +15,16 @@ public partial class CalendarPage : ContentPage
 
         BindingContext = new CalendarViewModel(data);
     }
+
+    // выход: чистим токен и возвращаемся на экран входа
+    private async void OnLogoutClicked(object? sender, EventArgs e)
+    {
+        var services = Application.Current?.Handler?.MauiContext?.Services;
+        var auth = services?.GetService<IAuthService>();
+        if (auth is not null)
+            await auth.LogoutAsync();
+
+        if (Application.Current?.Windows.Count > 0)
+            Application.Current.Windows[0].Page = new LoginPage();
+    }
 }

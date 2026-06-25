@@ -10,6 +10,10 @@
              Shell.TitleColor="#FFFFFF"
              Shell.ForegroundColor="#FFFFFF">
 
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Выйти" Clicked="OnLogoutClicked" />
+    </ContentPage.ToolbarItems>
+
     <ContentPage.Resources>
 
         <!-- ПАЛИТРА (Apple Dark на чёрном) -->

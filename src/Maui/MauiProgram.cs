@@ -19,6 +19,9 @@ public static class MauiProgram
 		// HttpClient для обращения к API
 		builder.Services.AddSingleton(new HttpClient { BaseAddress = new Uri(ApiConfig.BaseUrl) });
 
+		// авторизация (логин/регистрация + хранение токена)
+		builder.Services.AddSingleton<IAuthService, AuthService>();
+
 		// источник данных календаря.
 		// ApiCalendarDataService — живые данные (нужен JWT в ApiConfig.Token и запущенный API).
 		// Для работы без сервера верни StubCalendarDataService.

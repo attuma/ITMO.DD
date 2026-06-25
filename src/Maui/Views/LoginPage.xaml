@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="itmodd.Views.LoginPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#000000">
+
+    <ContentPage.Resources>
+        <Color x:Key="Surface">#1C1C1E</Color>
+        <Color x:Key="Separator">#38383A</Color>
+        <Color x:Key="TextPrimary">#FFFFFF</Color>
+        <Color x:Key="TextSecondary">#8E8E93</Color>
+        <Color x:Key="Accent">#0A84FF</Color>
+        <Color x:Key="Red">#FF453A</Color>
+    </ContentPage.Resources>
+
+    <Grid Padding="24" VerticalOptions="Center">
+
+        <Border Stroke="{StaticResource Separator}" StrokeThickness="1"
+                BackgroundColor="{StaticResource Surface}"
+                Padding="24"
+                MaximumWidthRequest="420"
+                HorizontalOptions="Center">
+            <Border.StrokeShape><RoundRectangle CornerRadius="18" /></Border.StrokeShape>
+
+            <VerticalStackLayout Spacing="14">
+
+                <Label Text="Student Tracker"
+                       FontSize="26" FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}"
+                       HorizontalOptions="Center" />
+                <Label Text="Вход в аккаунт"
+                       FontSize="13"
+                       TextColor="{StaticResource TextSecondary}"
+                       HorizontalOptions="Center" />
+
+                <!-- имя пользователя — только при регистрации -->
+                <Entry Placeholder="Имя пользователя"
+                       Text="{Binding Username}"
+                       IsVisible="{Binding IsRegisterMode}"
+                       TextColor="{StaticResource TextPrimary}"
+                       PlaceholderColor="{StaticResource TextSecondary}"
+                       BackgroundColor="#2C2C2E" />
+
+                <Entry Placeholder="Email"
+                       Text="{Binding Email}"
+                       Keyboard="Email"
+                       TextColor="{StaticResource TextPrimary}"
+                       PlaceholderColor="{StaticResource TextSecondary}"
+                       BackgroundColor="#2C2C2E" />
+
+                <Entry Placeholder="Пароль"
+                       Text="{Binding Password}"
+                       IsPassword="True"
+                       TextColor="{StaticResource TextPrimary}"
+                       PlaceholderColor="{StaticResource TextSecondary}"
+                       BackgroundColor="#2C2C2E" />
+
+                <!-- ошибка -->
+                <Label Text="{Binding ErrorMessage}"
+                       IsVisible="{Binding HasError}"
+                       TextColor="{StaticResource Red}"
+                       FontSize="13" />
+
+                <!-- кнопка входа/регистрации -->
+                <Button Text="{Binding SubmitText}"
+                        Command="{Binding SubmitCommand}"
+                        BackgroundColor="{StaticResource Accent}"
+                        TextColor="White"
+                        CornerRadius="12"
+                        HeightRequest="48" />
+
+                <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                   IsVisible="{Binding IsBusy}"
+                                   Color="{StaticResource Accent}" />
+
+                <!-- переключение режима -->
+                <Button Text="{Binding ToggleText}"
+                        Command="{Binding ToggleModeCommand}"
+                        BackgroundColor="Transparent"
+                        TextColor="{StaticResource Accent}"
+                        FontSize="13" />
+
+            </VerticalStackLayout>
+        </Border>
+
+    </Grid>
+
+</ContentPage>

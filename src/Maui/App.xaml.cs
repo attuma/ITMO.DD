@@ -11,6 +11,7 @@ public partial class App : Application
 
 	protected override Window CreateWindow(IActivationState? activationState)
 	{
-		return new Window(new AppShell());
+		// стартуем с экрана входа; он сам перейдёт в AppShell при наличии токена
+		return new Window(new Views.LoginPage());
 	}
 }

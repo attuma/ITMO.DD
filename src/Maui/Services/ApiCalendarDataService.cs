@@ -11,11 +11,13 @@ namespace itmodd.Services;
 public class ApiCalendarDataService : ICalendarDataService
 {
     private readonly HttpClient _http;
+    private readonly IAuthService _auth;
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
-    public ApiCalendarDataService(HttpClient http)
+    public ApiCalendarDataService(HttpClient http, IAuthService auth)
     {
         _http = http;
+        _auth = auth;
     }
 
     public async Task<IReadOnlyList<DeadlineItem>> GetDeadlinesAsync(int year, int month)
@@ -52,7 +54,7 @@ public class ApiCalendarDataService : ICalendarDataService
     // один поход в API; ошибки гасим и отдаём пустой список
     private async Task<List<TaskApiResponse>> FetchTasksAsync()
     {
-        var token = ApiConfig.Token;
+        var token = _auth.Token;
         if (string.IsNullOrWhiteSpace(token))
         {
             Debug.WriteLine("[ApiCalendarDataService] нет JWT-токена — данные не загружаются");
