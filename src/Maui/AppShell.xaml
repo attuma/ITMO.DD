@@ -13,8 +13,8 @@
         Route="CalendarPage" />
 
     <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+        Title="Таймер"
+        ContentTemplate="{DataTemplate views:TimerPage}"
+        Route="TimerPage" />
 
 </Shell>

@@ -85,6 +85,68 @@ public class ApiClient : IApiClient
         }
     }
 
+    // ===== учебные сессии =====
+
+    public async Task<IReadOnlyList<SessionApiResponse>> GetSessionsAsync()
+    {
+        try
+        {
+            using var req = Authorized(HttpMethod.Get, "/sessions");
+            using var resp = await _http.SendAsync(req);
+            if (!resp.IsSuccessStatusCode)
+                return Array.Empty<SessionApiResponse>();
+
+            return await resp.Content.ReadFromJsonAsync<List<SessionApiResponse>>(Json)
+                   ?? new List<SessionApiResponse>();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ApiClient] GET /sessions: {ex.Message}");
+            return Array.Empty<SessionApiResponse>();
+        }
+    }
+
+    public async Task<(SessionApiResponse? session, string? error)> StartSessionAsync(int subjectId)
+    {
+        try
+        {
+            using var req = Authorized(HttpMethod.Post, "/sessions");
+            req.Content = JsonContent.Create(new { subjectId });
+            using var resp = await _http.SendAsync(req);
+            if (resp.IsSuccessStatusCode)
+                return (await resp.Content.ReadFromJsonAsync<SessionApiResponse>(Json), null);
+
+            return (null, await ReadErrorAsync(resp));
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ApiClient] POST /sessions: {ex.Message}");
+            return (null, "Не удалось связаться с сервером");
+        }
+    }
+
+    public Task<SessionApiResponse?> PauseSessionAsync(int sessionId) => SessionActionAsync(sessionId, "pause");
+    public Task<SessionApiResponse?> ResumeSessionAsync(int sessionId) => SessionActionAsync(sessionId, "resume");
+    public Task<SessionApiResponse?> CompleteSessionAsync(int sessionId) => SessionActionAsync(sessionId, "complete");
+
+    private async Task<SessionApiResponse?> SessionActionAsync(int sessionId, string action)
+    {
+        try
+        {
+            using var req = Authorized(HttpMethod.Post, $"/sessions/{sessionId}/{action}");
+            using var resp = await _http.SendAsync(req);
+            if (!resp.IsSuccessStatusCode)
+                return null;
+
+            return await resp.Content.ReadFromJsonAsync<SessionApiResponse>(Json);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ApiClient] POST /sessions/{sessionId}/{action}: {ex.Message}");
+            return null;
+        }
+    }
+
     private HttpRequestMessage Authorized(HttpMethod method, string path)
     {
         var req = new HttpRequestMessage(method, path);

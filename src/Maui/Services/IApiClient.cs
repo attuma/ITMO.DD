@@ -14,4 +14,14 @@ public interface IApiClient
 
     // создать задачу; null = успех, иначе текст ошибки
     Task<string?> CreateTaskAsync(string title, string? description, int subjectId, DateTime deadline);
+
+    // ===== учебные сессии (таймер) =====
+    Task<IReadOnlyList<SessionApiResponse>> GetSessionsAsync();
+
+    // старт: при наличии активной сессии вернётся ошибка (409)
+    Task<(SessionApiResponse? session, string? error)> StartSessionAsync(int subjectId);
+
+    Task<SessionApiResponse?> PauseSessionAsync(int sessionId);
+    Task<SessionApiResponse?> ResumeSessionAsync(int sessionId);
+    Task<SessionApiResponse?> CompleteSessionAsync(int sessionId);
 }

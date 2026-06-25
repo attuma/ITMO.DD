@@ -20,6 +20,16 @@ public class StringToColorConverter : IValueConverter
         => throw new NotSupportedException();
 }
 
+// bool -> противоположный bool (для IsVisible по «не-состоянию»)
+public class InvertBoolConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => value is bool b && !b;
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => value is bool b && !b;
+}
+
 // bool -> прозрачность. true (день этого месяца) = 1.0, false (соседний) = бледный.
 public class BoolToOpacityConverter : IValueConverter
 {

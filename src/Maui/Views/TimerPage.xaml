@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="itmodd.Views.TimerPage"
+             Title="Таймер"
+             BackgroundColor="#000000"
+             Shell.BackgroundColor="#000000"
+             Shell.TitleColor="#FFFFFF"
+             Shell.ForegroundColor="#FFFFFF">
+
+    <ContentPage.Resources>
+        <Color x:Key="Surface">#1C1C1E</Color>
+        <Color x:Key="Field">#2C2C2E</Color>
+        <Color x:Key="Separator">#38383A</Color>
+        <Color x:Key="TextPrimary">#FFFFFF</Color>
+        <Color x:Key="TextSecondary">#8E8E93</Color>
+        <Color x:Key="Accent">#0A84FF</Color>
+        <Color x:Key="Green">#30D158</Color>
+        <Color x:Key="Orange">#FF9F0A</Color>
+        <Color x:Key="Red">#FF453A</Color>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="16">
+
+        <!-- БЛОК ТАЙМЕРА -->
+        <Border Grid.Row="0" BackgroundColor="{StaticResource Surface}" Stroke="{StaticResource Separator}"
+                StrokeThickness="1" Padding="20">
+            <Border.StrokeShape><RoundRectangle CornerRadius="18" /></Border.StrokeShape>
+
+            <VerticalStackLayout Spacing="14">
+
+                <!-- выбор предмета (когда нет активной сессии) -->
+                <VerticalStackLayout Spacing="6" IsVisible="{Binding IsIdle}">
+                    <Label Text="Предмет" FontSize="12" TextColor="{StaticResource TextSecondary}" />
+                    <Picker ItemsSource="{Binding Subjects}"
+                            SelectedItem="{Binding SelectedSubject}"
+                            ItemDisplayBinding="{Binding SubjectName}"
+                            Title="Выбери предмет"
+                            TextColor="{StaticResource TextPrimary}" TitleColor="{StaticResource TextSecondary}"
+                            BackgroundColor="{StaticResource Field}" />
+                </VerticalStackLayout>
+
+                <!-- текущий предмет (когда идёт/пауза) -->
+                <Label Text="{Binding CurrentSubjectName}"
+                       IsVisible="{Binding IsIdle, Converter={StaticResource InvertBool}}"
+                       FontSize="15" TextColor="{StaticResource TextSecondary}"
+                       HorizontalOptions="Center" />
+
+                <!-- большой счётчик -->
+                <Label Text="{Binding ElapsedText}"
+                       FontSize="56" FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}"
+                       HorizontalOptions="Center" />
+
+                <!-- кнопки по состоянию -->
+                <Button Text="Начать" Command="{Binding StartCommand}"
+                        IsVisible="{Binding IsIdle}"
+                        BackgroundColor="{StaticResource Green}" TextColor="White"
+                        CornerRadius="12" HeightRequest="50" />
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="10"
+                      IsVisible="{Binding IsIdle, Converter={StaticResource InvertBool}}">
+                    <Button Grid.Column="0" Text="Пауза" Command="{Binding PauseCommand}"
+                            IsVisible="{Binding IsRunning}"
+                            BackgroundColor="{StaticResource Orange}" TextColor="White"
+                            CornerRadius="12" HeightRequest="50" />
+                    <Button Grid.Column="0" Text="Продолжить" Command="{Binding ResumeCommand}"
+                            IsVisible="{Binding IsPaused}"
+                            BackgroundColor="{StaticResource Accent}" TextColor="White"
+                            CornerRadius="12" HeightRequest="50" />
+                    <Button Grid.Column="1" Text="Завершить" Command="{Binding CompleteCommand}"
+                            BackgroundColor="{StaticResource Red}" TextColor="White"
+                            CornerRadius="12" HeightRequest="50" />
+                </Grid>
+
+                <Label Text="{Binding Error}" IsVisible="{Binding HasError}"
+                       TextColor="{StaticResource Red}" FontSize="13" HorizontalOptions="Center" />
+
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- ИСТОРИЯ -->
+        <Grid Grid.Row="1" RowDefinitions="Auto,*" RowSpacing="8">
+            <Label Grid.Row="0" Text="История" FontSize="16" FontAttributes="Bold"
+                   TextColor="{StaticResource TextPrimary}" />
+
+            <CollectionView Grid.Row="1" ItemsSource="{Binding History}">
+                <CollectionView.EmptyView>
+                    <Label Text="Завершённых сессий пока нет"
+                           FontSize="13" TextColor="{StaticResource TextSecondary}" />
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="Auto,*,Auto" Padding="0,8" ColumnSpacing="10">
+                            <Border Grid.Column="0" WidthRequest="12" HeightRequest="12" Padding="0"
+                                    VerticalOptions="Center"
+                                    BackgroundColor="{Binding Color, Converter={StaticResource StringToColor}}"
+                                    StrokeThickness="0">
+                                <Border.StrokeShape><RoundRectangle CornerRadius="6" /></Border.StrokeShape>
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                <Label Text="{Binding SubjectName}" FontSize="14" TextColor="{StaticResource TextPrimary}" />
+                                <Label Text="{Binding DateText}" FontSize="11" TextColor="{StaticResource TextSecondary}" />
+                            </VerticalStackLayout>
+                            <Label Grid.Column="2" Text="{Binding DurationText}" FontSize="14" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextPrimary}" VerticalOptions="Center" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+
+    </Grid>
+
+</ContentPage>
