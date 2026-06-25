@@ -8,7 +8,7 @@ public partial class AddTaskPage : ContentPage
     private readonly AddTaskViewModel _vm;
     private readonly Func<Task>? _onSaved;
 
-    public AddTaskPage(Func<Task>? onSaved = null)
+    public AddTaskPage(Func<Task>? onSaved = null, DateTime? initialDate = null)
     {
         InitializeComponent();
         _onSaved = onSaved;
@@ -19,6 +19,11 @@ public partial class AddTaskPage : ContentPage
                                    services?.GetService<IAuthService>() ?? new AuthService(new HttpClient { BaseAddress = new Uri(ApiConfig.BaseUrl) }));
 
         _vm = new AddTaskViewModel(api);
+
+        // если в календаре был выбран день — стартуем форму с его датой
+        if (initialDate is { } date)
+            _vm.DeadlineDate = date;
+
         _vm.Saved += OnSaved;
         BindingContext = _vm;
     }

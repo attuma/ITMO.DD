@@ -20,11 +20,15 @@ public partial class CalendarPage : ContentPage
     private async void OnAddTaskClicked(object? sender, EventArgs e)
     {
         var vm = BindingContext as CalendarViewModel;
+
+        // если выбран день — подставим его дату в форму
+        var initialDate = vm?.SelectedDay?.Date;
+
         await Navigation.PushModalAsync(new AddTaskPage(async () =>
         {
             if (vm is not null)
                 await vm.RefreshAsync();
-        }));
+        }, initialDate));
     }
 
     // выход: чистим токен и возвращаемся на экран входа
