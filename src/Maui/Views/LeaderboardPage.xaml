@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="itmodd.Views.LeaderboardPage"
+             Title="Рейтинг"
+             BackgroundColor="#000000"
+             Shell.BackgroundColor="#000000"
+             Shell.TitleColor="#FFFFFF"
+             Shell.ForegroundColor="#FFFFFF">
+
+    <ContentPage.Resources>
+        <Color x:Key="Surface">#1C1C1E</Color>
+        <Color x:Key="Separator">#38383A</Color>
+        <Color x:Key="TextPrimary">#FFFFFF</Color>
+        <Color x:Key="TextSecondary">#8E8E93</Color>
+        <Color x:Key="Accent">#0A84FF</Color>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="14">
+
+        <!-- период -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,*,*" ColumnSpacing="8">
+            <Button Grid.Column="0" Text="Сегодня"
+                    Command="{Binding SelectPeriodCommand}" CommandParameter="daily"
+                    BackgroundColor="{Binding DailyBg, Converter={StaticResource StringToColor}}"
+                    TextColor="{StaticResource TextPrimary}" CornerRadius="12" HeightRequest="44" />
+            <Button Grid.Column="1" Text="Неделя"
+                    Command="{Binding SelectPeriodCommand}" CommandParameter="weekly"
+                    BackgroundColor="{Binding WeeklyBg, Converter={StaticResource StringToColor}}"
+                    TextColor="{StaticResource TextPrimary}" CornerRadius="12" HeightRequest="44" />
+            <Button Grid.Column="2" Text="Месяц"
+                    Command="{Binding SelectPeriodCommand}" CommandParameter="monthly"
+                    BackgroundColor="{Binding MonthlyBg, Converter={StaticResource StringToColor}}"
+                    TextColor="{StaticResource TextPrimary}" CornerRadius="12" HeightRequest="44" />
+        </Grid>
+
+        <!-- список -->
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Entries}">
+            <CollectionView.EmptyView>
+                <Label Text="Пока нет данных за этот период"
+                       FontSize="14" TextColor="{StaticResource TextSecondary}"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Margin="0,4" Padding="14,12"
+                            BackgroundColor="{StaticResource Surface}"
+                            Stroke="Transparent" StrokeThickness="1.5">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="14" /></Border.StrokeShape>
+                        <Border.Triggers>
+                            <!-- подсветка строки текущего пользователя -->
+                            <DataTrigger TargetType="Border" Binding="{Binding IsMe}" Value="True">
+                                <Setter Property="Stroke" Value="{StaticResource Accent}" />
+                                <Setter Property="BackgroundColor" Value="#16314D" />
+                            </DataTrigger>
+                        </Border.Triggers>
+
+                        <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="10">
+                            <Label Grid.Column="0" Text="{Binding RankText}"
+                                   FontSize="18" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextPrimary}"
+                                   VerticalOptions="Center" HorizontalOptions="Center" />
+                            <Label Grid.Column="1" Text="{Binding Username}"
+                                   FontSize="16" TextColor="{StaticResource TextPrimary}"
+                                   VerticalOptions="Center" />
+                            <Label Grid.Column="2" Text="{Binding TimeText}"
+                                   FontSize="15" FontAttributes="Bold"
+                                   TextColor="{StaticResource Accent}"
+                                   VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+
+</ContentPage>

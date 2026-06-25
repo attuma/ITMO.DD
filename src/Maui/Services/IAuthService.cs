@@ -9,6 +9,12 @@ public interface IAuthService
     string? Token { get; }
     bool IsAuthenticated { get; }
 
+    /// <summary>Id текущего пользователя из JWT — для подсветки «себя» в рейтинге. null = не авторизован.</summary>
+    int? CurrentUserId { get; }
+
+    /// <summary>Имя текущего пользователя из JWT.</summary>
+    string? CurrentUsername { get; }
+
     // восстановить сессию из хранилища (при старте). true = токен есть
     Task<bool> TryRestoreAsync();
 

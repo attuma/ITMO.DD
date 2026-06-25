@@ -87,6 +87,7 @@ public class ApiClient : IApiClient
 
     // ===== учебные сессии =====
 
+    /// <summary>Все сессии пользователя (для восстановления активной и для истории). Ошибка → пустой список.</summary>
     public async Task<IReadOnlyList<SessionApiResponse>> GetSessionsAsync()
     {
         try
@@ -106,6 +107,12 @@ public class ApiClient : IApiClient
         }
     }
 
+    /// <summary>
+    /// Стартует сессию по предмету. Возвращает кортеж (сессия, текст ошибки):
+    /// при успехе — (session, null), при неудаче — (null, сообщение).
+    /// Сервер вернёт 409, если у юзера уже есть активная/приостановленная сессия —
+    /// текст ошибки достаём из тела через <see cref="ReadErrorAsync"/>.
+    /// </summary>
     public async Task<(SessionApiResponse? session, string? error)> StartSessionAsync(int subjectId)
     {
         try
@@ -125,10 +132,16 @@ public class ApiClient : IApiClient
         }
     }
 
+    /// <summary>Пауза сессии (POST /sessions/{id}/pause). null = не получилось.</summary>
     public Task<SessionApiResponse?> PauseSessionAsync(int sessionId) => SessionActionAsync(sessionId, "pause");
+
+    /// <summary>Продолжить после паузы (POST /sessions/{id}/resume). null = не получилось.</summary>
     public Task<SessionApiResponse?> ResumeSessionAsync(int sessionId) => SessionActionAsync(sessionId, "resume");
+
+    /// <summary>Завершить сессию (POST /sessions/{id}/complete). null = не получилось.</summary>
     public Task<SessionApiResponse?> CompleteSessionAsync(int sessionId) => SessionActionAsync(sessionId, "complete");
 
+    /// <summary>Общая «ручка» для pause/resume/complete — все три это POST без тела по схожему адресу.</summary>
     private async Task<SessionApiResponse?> SessionActionAsync(int sessionId, string action)
     {
         try
@@ -147,6 +160,37 @@ public class ApiClient : IApiClient
         }
     }
 
+    // ===== рейтинг =====
+
+    /// <summary>
+    /// Запрашивает топ пользователей за период (<paramref name="period"/> = daily|weekly|monthly).
+    /// Эндпоинт требует JWT (RequireAuthorization на сервере) — токен подставляет <see cref="Authorized"/>.
+    /// При любой ошибке (нет сети, не 2xx, битый JSON) возвращает пустой список, чтобы UI не падал.
+    /// </summary>
+    public async Task<IReadOnlyList<LeaderboardEntryResponse>> GetLeaderboardAsync(string period)
+    {
+        try
+        {
+            using var req = Authorized(HttpMethod.Get, $"/leaderboard/{period}");
+            using var resp = await _http.SendAsync(req);
+            if (!resp.IsSuccessStatusCode)
+                return Array.Empty<LeaderboardEntryResponse>();
+
+            return await resp.Content.ReadFromJsonAsync<List<LeaderboardEntryResponse>>(Json)
+                   ?? new List<LeaderboardEntryResponse>();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ApiClient] GET /leaderboard/{period}: {ex.Message}");
+            return Array.Empty<LeaderboardEntryResponse>();
+        }
+    }
+
+    /// <summary>
+    /// Собирает HTTP-запрос и, если в <see cref="IAuthService"/> есть токен,
+    /// добавляет заголовок <c>Authorization: Bearer &lt;jwt&gt;</c>.
+    /// Через неё проходят все защищённые вызовы (задачи, предметы, сессии, рейтинг).
+    /// </summary>
     private HttpRequestMessage Authorized(HttpMethod method, string path)
     {
         var req = new HttpRequestMessage(method, path);

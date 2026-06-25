@@ -14,6 +14,8 @@ public class AuthService : IAuthService
 
     private readonly HttpClient _http;
     private string? _token;
+    private int? _currentUserId;
+    private string? _currentUsername;
 
     public AuthService(HttpClient http)
     {
@@ -22,10 +24,26 @@ public class AuthService : IAuthService
 
     public string? Token => _token;
     public bool IsAuthenticated => !string.IsNullOrWhiteSpace(_token);
+    /// <summary>Id текущего пользователя, вытащенный из JWT. null — если не залогинен/токен битый.</summary>
+    public int? CurrentUserId => _currentUserId;
+
+    /// <summary>Имя текущего пользователя из JWT.</summary>
+    public string? CurrentUsername => _currentUsername;
+
+    /// <summary>
+    /// Единая точка установки токена (логин/восстановление/логаут).
+    /// Заодно сразу разбирает payload JWT и кэширует userId/username,
+    /// чтобы не парсить токен каждый раз.
+    /// </summary>
+    private void SetToken(string? token)
+    {
+        _token = token;
+        (_currentUserId, _currentUsername) = ParseToken(token);
+    }
 
     public async Task<bool> TryRestoreAsync()
     {
-        _token = await LoadTokenAsync();
+        SetToken(await LoadTokenAsync());
         return IsAuthenticated;
     }
 
@@ -37,7 +55,7 @@ public class AuthService : IAuthService
 
     public async Task LogoutAsync()
     {
-        _token = null;
+        SetToken(null);
         try { SecureStorage.Default.Remove(TokenKey); } catch { /* игнор */ }
         Preferences.Default.Remove(TokenKey);
         await Task.CompletedTask;
@@ -60,7 +78,7 @@ public class AuthService : IAuthService
             if (auth is null || string.IsNullOrWhiteSpace(auth.Token))
                 return new AuthResult(false, "Пустой ответ сервера");
 
-            _token = auth.Token;
+            SetToken(auth.Token);
             await SaveTokenAsync(auth.Token);
             return new AuthResult(true);
         }
@@ -85,6 +103,46 @@ public class AuthService : IAuthService
         return response.StatusCode == System.Net.HttpStatusCode.Unauthorized
             ? "Неверный email или пароль"
             : $"Ошибка ({(int)response.StatusCode})";
+    }
+
+    /// <summary>
+    /// Достаёт userId и username из payload JWT БЕЗ проверки подписи
+    /// (подпись валидирует сервер на каждом запросе — клиенту нужно лишь прочитать claims).
+    /// Шаги: берём среднюю часть токена (header.<b>payload</b>.signature) →
+    /// переводим из base64url в обычный base64 → декодируем JSON → читаем стандартные
+    /// claim-URI <c>nameidentifier</c> и <c>name</c> (именно так их кладёт серверный JwtService).
+    /// Любая ошибка парсинга → (null, null), без исключений наружу.
+    /// </summary>
+    private static (int? userId, string? username) ParseToken(string? token)
+    {
+        if (string.IsNullOrWhiteSpace(token)) return (null, null);
+        try
+        {
+            var parts = token.Split('.');
+            if (parts.Length < 2) return (null, null);
+
+            var payload = parts[1].Replace('-', '+').Replace('_', '/');
+            switch (payload.Length % 4) { case 2: payload += "=="; break; case 3: payload += "="; break; }
+
+            using var doc = JsonDocument.Parse(Convert.FromBase64String(payload));
+            var root = doc.RootElement;
+
+            int? uid = null;
+            string? name = null;
+            const string idClaim = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
+            const string nameClaim = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name";
+
+            if (root.TryGetProperty(idClaim, out var idEl) && int.TryParse(idEl.GetString(), out var i))
+                uid = i;
+            if (root.TryGetProperty(nameClaim, out var nameEl))
+                name = nameEl.GetString();
+
+            return (uid, name);
+        }
+        catch
+        {
+            return (null, null);
+        }
     }
 
     // SecureStorage предпочтительно; если недоступно (напр. keychain) — Preferences

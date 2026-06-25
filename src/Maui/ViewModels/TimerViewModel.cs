@@ -5,24 +5,39 @@ using Microsoft.Maui.Dispatching;
 
 namespace itmodd.ViewModels;
 
-// одна строка истории сессий
+/// <summary>Готовая к показу строка истории завершённых сессий (нижний список на экране таймера).</summary>
 public class SessionHistoryItem
 {
+    /// <summary>Название предмета.</summary>
     public string SubjectName { get; init; } = string.Empty;
+
+    /// <summary>Цвет предмета (hex) — для цветной метки в списке.</summary>
     public string Color { get; init; } = "#808080";
+
+    /// <summary>Когда была сессия, напр. «5 июн, 14:30».</summary>
     public string DateText { get; init; } = string.Empty;
+
+    /// <summary>Длительность «ЧЧ:ММ:СС».</summary>
     public string DurationText { get; init; } = string.Empty;
 }
 
+/// <summary>
+/// ViewModel экрана «Таймер». Управляет одной активной сессией
+/// (старт/пауза/продолжить/завершить через API), тикающим счётчиком на экране
+/// и историей завершённых сессий снизу.
+/// </summary>
 public class TimerViewModel : BaseViewModel
 {
     private readonly IApiClient _api;
     private readonly IDispatcherTimer _timer;
 
-    // учёт времени: накопленное + момент старта текущего отрезка (локальное время)
+    // Учёт времени держим локально, чтобы счётчик тикал плавно без дёрганья сервера:
+    //  _accumulated  — сколько уже «накапали» до текущего запущенного отрезка;
+    //  _runningSince — момент старта текущего отрезка (null = на паузе/стоит).
+    // Итого на экране = _accumulated + (сейчас - _runningSince).
     private TimeSpan _accumulated;
     private DateTime? _runningSince;
-    private SessionApiResponse? _current;
+    private SessionApiResponse? _current;   // текущая сессия с сервера (null = простой)
 
     private readonly Dictionary<int, SubjectApiResponse> _subjectById = new();
 
@@ -51,17 +66,25 @@ public class TimerViewModel : BaseViewModel
         set { _selectedSubject = value; OnPropertyChanged(); ((Command)StartCommand).ChangeCanExecute(); }
     }
 
-    // ===== состояние =====
-    // нет активной/приостановленной сессии -> можно выбирать предмет и стартовать
+    // ===== состояние (бинды кнопок/панелей в XAML) =====
+
+    /// <summary>Нет сессии — можно выбрать предмет и нажать «Старт».</summary>
     public bool IsIdle => _current is null;
+
+    /// <summary>Сессия идёт (есть текущая и отсчёт запущен).</summary>
     public bool IsRunning => _current is not null && _runningSince is not null;
+
+    /// <summary>Сессия есть, но на паузе (отсчёт остановлен).</summary>
     public bool IsPaused => _current is not null && _runningSince is null;
+
+    /// <summary>Кнопка «Старт» активна только в простое и при выбранном предмете.</summary>
     public bool CanStart => IsIdle && SelectedSubject is not null;
 
     // подпись текущего предмета
     public string CurrentSubjectName =>
         _current is not null && _subjectById.TryGetValue(_current.SubjectId, out var s) ? s.SubjectName : string.Empty;
 
+    /// <summary>Прошедшее время для экрана в формате «ЧЧ:ММ:СС». Пересчитывается каждую секунду по тику таймера.</summary>
     public string ElapsedText
     {
         get
@@ -82,6 +105,12 @@ public class TimerViewModel : BaseViewModel
     public Command CompleteCommand { get; }
 
     // ===== загрузка/восстановление =====
+
+    /// <summary>
+    /// Вызывается при открытии экрана. Грузит предметы и сессии, и если на сервере
+    /// есть незакрытая сессия (active/paused) — восстанавливает её, чтобы таймер
+    /// «продолжился» после перезапуска приложения. Затем строит историю.
+    /// </summary>
     public async Task InitAsync()
     {
         var subjects = await _api.GetSubjectsAsync();
@@ -113,6 +142,10 @@ public class TimerViewModel : BaseViewModel
         RaiseStateChanged();
     }
 
+    /// <summary>
+    /// Собирает нижний список истории из завершённых сессий (у которых есть EndedAt),
+    /// от новых к старым. Длительность = EndedAt − StartedAt (пауз не вычитаем — приближение).
+    /// </summary>
     private void BuildHistory(IReadOnlyList<SessionApiResponse> sessions)
     {
         History.Clear();
@@ -133,7 +166,9 @@ public class TimerViewModel : BaseViewModel
         }
     }
 
-    // ===== действия =====
+    // ===== действия (кнопки) =====
+
+    /// <summary>«Старт»: создаёт сессию на сервере, обнуляет счётчик и запускает тик.</summary>
     private async Task StartAsync()
     {
         if (SelectedSubject is null) return;
@@ -153,6 +188,7 @@ public class TimerViewModel : BaseViewModel
         RaiseStateChanged();
     }
 
+    /// <summary>«Пауза»: фиксирует накопленное время в _accumulated, останавливает тик.</summary>
     private async Task PauseAsync()
     {
         if (_current is null || _runningSince is null) return;
@@ -166,6 +202,7 @@ public class TimerViewModel : BaseViewModel
         RaiseStateChanged();
     }
 
+    /// <summary>«Продолжить»: снова запоминает момент старта отрезка и включает тик.</summary>
     private async Task ResumeAsync()
     {
         if (_current is null || _runningSince is not null) return;
@@ -178,6 +215,7 @@ public class TimerViewModel : BaseViewModel
         RaiseStateChanged();
     }
 
+    /// <summary>«Завершить»: закрывает сессию на сервере, сбрасывает состояние и перечитывает историю.</summary>
     private async Task CompleteAsync()
     {
         if (_current is null) return;
@@ -196,6 +234,7 @@ public class TimerViewModel : BaseViewModel
         RaiseStateChanged();
     }
 
+    /// <summary>Дёргает все вычисляемые состояния разом, чтобы UI (кнопки/панели) перерисовался.</summary>
     private void RaiseStateChanged()
     {
         OnPropertyChanged(nameof(IsIdle));

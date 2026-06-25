@@ -20,6 +20,7 @@ public partial class TimerPage : ContentPage
         BindingContext = _vm;
     }
 
+    /// <summary>При показе экрана запускаем анимацию градиента и грузим/восстанавливаем сессию.</summary>
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -33,7 +34,10 @@ public partial class TimerPage : ContentPage
         this.AbortAnimation("shimmer");
     }
 
-    // плавно гоняем точки градиента по диагонали (sin -> бесшовный цикл)
+    /// <summary>
+    /// Бесконечная анимация «мерцания»: плавно гоняет начальную/конечную точки
+    /// градиента по диагонали. Через sin(0..2π) движение зацикливается без рывка на стыке.
+    /// </summary>
     private void StartShimmer()
     {
         var anim = new Animation(v =>
