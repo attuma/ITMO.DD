@@ -27,13 +27,19 @@ public class TaskService : ITaskService
         if (subject.OwnerUserId != userId)
             throw new ForbiddenException("Access denied");
 
+        // колонка deadline_at — timestamptz, Postgres требует UTC.
+        // local -> конвертируем, остальное (unspecified/utc) -> помечаем UTC.
+        var deadline = request.DeadlineAt is { } d
+            ? (d.Kind == DateTimeKind.Local ? d.ToUniversalTime() : DateTime.SpecifyKind(d, DateTimeKind.Utc))
+            : (DateTime?)null;
+
         // CreateForUser - XOR правило: задача принадлежит либо пользователю либо группе
         var task = TaskItem.CreateForUser(
             request.Title,
             request.Description,
             request.SubjectId,
             userId,
-            request.DeadlineAt);
+            deadline);
 
         await _taskRepository.AddAsync(task);
         await _taskRepository.SaveChangesAsync();
