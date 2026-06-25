@@ -16,8 +16,13 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
 
-		// источник данных календаря: пока заглушка, позже подменим на API-реализацию
-		builder.Services.AddSingleton<ICalendarDataService, StubCalendarDataService>();
+		// HttpClient для обращения к API
+		builder.Services.AddSingleton(new HttpClient { BaseAddress = new Uri(ApiConfig.BaseUrl) });
+
+		// источник данных календаря.
+		// ApiCalendarDataService — живые данные (нужен JWT в ApiConfig.Token и запущенный API).
+		// Для работы без сервера верни StubCalendarDataService.
+		builder.Services.AddSingleton<ICalendarDataService, ApiCalendarDataService>();
 
 #if DEBUG
 		builder.Logging.AddDebug();
