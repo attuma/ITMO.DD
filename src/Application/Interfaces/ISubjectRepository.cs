@@ -7,6 +7,7 @@ public interface ISubjectRepository
     Task<List<Subject>> GetByUserIdAsync(int userId);
     Task<List<Subject>> GetByGroupIdAsync(int groupId);
     Task<Subject?> GetByIdAsync(int subjectId);
+    Task<List<Subject>> GetAccessibleByUserIdAsync(int userId);
     Task AddAsync(Subject subject);
     Task SaveChangesAsync();
 }
