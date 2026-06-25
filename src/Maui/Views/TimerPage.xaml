@@ -20,95 +20,106 @@
         <Color x:Key="Red">#FF453A</Color>
     </ContentPage.Resources>
 
-    <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="16">
+    <Grid ColumnDefinitions="*,*" Padding="16" ColumnSpacing="16">
 
-        <!-- БЛОК ТАЙМЕРА -->
-        <Border Grid.Row="0" BackgroundColor="{StaticResource Surface}" Stroke="{StaticResource Separator}"
-                StrokeThickness="1" Padding="20">
-            <Border.StrokeShape><RoundRectangle CornerRadius="18" /></Border.StrokeShape>
+        <!-- ЛЕВО: ТАЙМЕР с зелёным переливающимся градиентом -->
+        <Border Grid.Column="0" x:Name="TimerCard"
+                Stroke="#2E7D52" StrokeThickness="1" Padding="24">
+            <Border.StrokeShape><RoundRectangle CornerRadius="22" /></Border.StrokeShape>
+            <Border.Background>
+                <LinearGradientBrush x:Name="TimerGradient" StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#0B3D2A" Offset="0.0" />
+                    <GradientStop Color="#1F7A4D" Offset="0.5" />
+                    <GradientStop Color="#0B3D2A" Offset="1.0" />
+                </LinearGradientBrush>
+            </Border.Background>
 
-            <VerticalStackLayout Spacing="14">
+            <VerticalStackLayout Spacing="16" VerticalOptions="Center">
 
-                <!-- выбор предмета (когда нет активной сессии) -->
+                <!-- выбор предмета (нет активной сессии) -->
                 <VerticalStackLayout Spacing="6" IsVisible="{Binding IsIdle}">
-                    <Label Text="Предмет" FontSize="12" TextColor="{StaticResource TextSecondary}" />
+                    <Label Text="Предмет" FontSize="12" TextColor="#BFE7D2" />
                     <Picker ItemsSource="{Binding Subjects}"
                             SelectedItem="{Binding SelectedSubject}"
                             ItemDisplayBinding="{Binding SubjectName}"
                             Title="Выбери предмет"
-                            TextColor="{StaticResource TextPrimary}" TitleColor="{StaticResource TextSecondary}"
-                            BackgroundColor="{StaticResource Field}" />
+                            TextColor="{StaticResource TextPrimary}" TitleColor="#BFE7D2"
+                            BackgroundColor="#1A3D2E" />
                 </VerticalStackLayout>
 
-                <!-- текущий предмет (когда идёт/пауза) -->
+                <!-- текущий предмет -->
                 <Label Text="{Binding CurrentSubjectName}"
                        IsVisible="{Binding IsIdle, Converter={StaticResource InvertBool}}"
-                       FontSize="15" TextColor="{StaticResource TextSecondary}"
-                       HorizontalOptions="Center" />
+                       FontSize="15" TextColor="#BFE7D2" HorizontalOptions="Center" />
 
                 <!-- большой счётчик -->
                 <Label Text="{Binding ElapsedText}"
-                       FontSize="56" FontAttributes="Bold"
-                       TextColor="{StaticResource TextPrimary}"
-                       HorizontalOptions="Center" />
+                       FontSize="60" FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}" HorizontalOptions="Center" />
 
-                <!-- кнопки по состоянию -->
+                <!-- кнопки -->
                 <Button Text="Начать" Command="{Binding StartCommand}"
                         IsVisible="{Binding IsIdle}"
-                        BackgroundColor="{StaticResource Green}" TextColor="White"
-                        CornerRadius="12" HeightRequest="50" />
+                        BackgroundColor="{StaticResource Green}" TextColor="#0B3D2A"
+                        FontAttributes="Bold" CornerRadius="14" HeightRequest="52" />
 
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="10"
                       IsVisible="{Binding IsIdle, Converter={StaticResource InvertBool}}">
                     <Button Grid.Column="0" Text="Пауза" Command="{Binding PauseCommand}"
                             IsVisible="{Binding IsRunning}"
                             BackgroundColor="{StaticResource Orange}" TextColor="White"
-                            CornerRadius="12" HeightRequest="50" />
+                            CornerRadius="14" HeightRequest="52" />
                     <Button Grid.Column="0" Text="Продолжить" Command="{Binding ResumeCommand}"
                             IsVisible="{Binding IsPaused}"
                             BackgroundColor="{StaticResource Accent}" TextColor="White"
-                            CornerRadius="12" HeightRequest="50" />
+                            CornerRadius="14" HeightRequest="52" />
                     <Button Grid.Column="1" Text="Завершить" Command="{Binding CompleteCommand}"
                             BackgroundColor="{StaticResource Red}" TextColor="White"
-                            CornerRadius="12" HeightRequest="50" />
+                            CornerRadius="14" HeightRequest="52" />
                 </Grid>
 
                 <Label Text="{Binding Error}" IsVisible="{Binding HasError}"
-                       TextColor="{StaticResource Red}" FontSize="13" HorizontalOptions="Center" />
+                       TextColor="#FFD7D3" FontSize="13" HorizontalOptions="Center" />
 
             </VerticalStackLayout>
         </Border>
 
-        <!-- ИСТОРИЯ -->
-        <Grid Grid.Row="1" RowDefinitions="Auto,*" RowSpacing="8">
-            <Label Grid.Row="0" Text="История" FontSize="16" FontAttributes="Bold"
-                   TextColor="{StaticResource TextPrimary}" />
+        <!-- ПРАВО: ИСТОРИЯ -->
+        <Border Grid.Column="1" BackgroundColor="{StaticResource Surface}"
+                Stroke="{StaticResource Separator}" StrokeThickness="1" Padding="18">
+            <Border.StrokeShape><RoundRectangle CornerRadius="22" /></Border.StrokeShape>
 
-            <CollectionView Grid.Row="1" ItemsSource="{Binding History}">
-                <CollectionView.EmptyView>
-                    <Label Text="Завершённых сессий пока нет"
-                           FontSize="13" TextColor="{StaticResource TextSecondary}" />
-                </CollectionView.EmptyView>
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Grid ColumnDefinitions="Auto,*,Auto" Padding="0,8" ColumnSpacing="10">
-                            <Border Grid.Column="0" WidthRequest="12" HeightRequest="12" Padding="0"
-                                    VerticalOptions="Center"
-                                    BackgroundColor="{Binding Color, Converter={StaticResource StringToColor}}"
-                                    StrokeThickness="0">
-                                <Border.StrokeShape><RoundRectangle CornerRadius="6" /></Border.StrokeShape>
-                            </Border>
-                            <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
-                                <Label Text="{Binding SubjectName}" FontSize="14" TextColor="{StaticResource TextPrimary}" />
-                                <Label Text="{Binding DateText}" FontSize="11" TextColor="{StaticResource TextSecondary}" />
-                            </VerticalStackLayout>
-                            <Label Grid.Column="2" Text="{Binding DurationText}" FontSize="14" FontAttributes="Bold"
-                                   TextColor="{StaticResource TextPrimary}" VerticalOptions="Center" />
-                        </Grid>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-        </Grid>
+            <Grid RowDefinitions="Auto,*" RowSpacing="10">
+                <Label Grid.Row="0" Text="История сессий" FontSize="17" FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}" />
+
+                <CollectionView Grid.Row="1" ItemsSource="{Binding History}">
+                    <CollectionView.EmptyView>
+                        <Label Text="Завершённых сессий пока нет"
+                               FontSize="13" TextColor="{StaticResource TextSecondary}"
+                               HorizontalOptions="Center" VerticalOptions="Center" />
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="Auto,*,Auto" Padding="0,9" ColumnSpacing="10">
+                                <Border Grid.Column="0" WidthRequest="12" HeightRequest="12" Padding="0"
+                                        VerticalOptions="Center"
+                                        BackgroundColor="{Binding Color, Converter={StaticResource StringToColor}}"
+                                        StrokeThickness="0">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="6" /></Border.StrokeShape>
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="1" VerticalOptions="Center">
+                                    <Label Text="{Binding SubjectName}" FontSize="14" TextColor="{StaticResource TextPrimary}" />
+                                    <Label Text="{Binding DateText}" FontSize="11" TextColor="{StaticResource TextSecondary}" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="2" Text="{Binding DurationText}" FontSize="14" FontAttributes="Bold"
+                                       TextColor="{StaticResource TextPrimary}" VerticalOptions="Center" />
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </Grid>
+        </Border>
 
     </Grid>
 
