@@ -48,6 +48,11 @@ public class SubjectConfiguration : IEntityTypeConfiguration<Subject>
             .HasColumnName("is_default")
             .IsRequired();
 
+        builder.Property(s => s.Color)
+            .HasColumnName("color")
+            .HasMaxLength(9)
+            .IsRequired();
+
         builder.Property(s => s.CreatedAt)
             .HasColumnName("created_at")
             .IsRequired();

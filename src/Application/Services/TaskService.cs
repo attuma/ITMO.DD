@@ -2,6 +2,7 @@ using StudentTracker.Application.DTO;
 using StudentTracker.Application.Exceptions;
 using StudentTracker.Application.Interfaces;
 using StudentTracker.Domain.Entities;
+using StudentTracker.Domain.Enums;
 
 namespace StudentTracker.Application.Services;
 
@@ -37,17 +38,29 @@ public class TaskService : ITaskService
         await _taskRepository.AddAsync(task);
         await _taskRepository.SaveChangesAsync();
 
-        return Map(task);
+        // новая задача: цвет предмета известен, прогресс ещё не начат
+        return Map(task, subject.Color, TaskProgressStatus.NotStarted);
     }
 
     public async Task<List<TaskResponse>> GetUserTasksAsync(int userId)
     {
         var tasks = await _taskRepository.GetByUserIdAsync(userId);
 
-        // превращаем каждый TaskItem в TaskResponse
-        return tasks.Select(Map).ToList();
+        // цвет берём из предметов пользователя (SubjectId -> Color)
+        var subjects = await _subjectRepository.GetByUserIdAsync(userId);
+        var colorBySubject = subjects.ToDictionary(s => s.Id, s => s.Color);
+
+        // статус — из прогресса пользователя (TaskId -> Status); нет записи => NotStarted
+        var progress = await _taskRepository.GetProgressByUserAsync(userId);
+        var statusByTask = progress.ToDictionary(p => p.TaskId, p => p.ProgressStatus);
+
+        return tasks.Select(t => Map(
+            t,
+            colorBySubject.GetValueOrDefault(t.SubjectId, Subject.DefaultColor),
+            statusByTask.GetValueOrDefault(t.Id, TaskProgressStatus.NotStarted)))
+            .ToList();
     }
 
-    private static TaskResponse Map(TaskItem t) =>
-        new(t.Id, t.Title, t.Description, t.SubjectId, t.DeadlineAt, t.IsArchived);
+    private static TaskResponse Map(TaskItem t, string color, TaskProgressStatus status) =>
+        new(t.Id, t.Title, t.Description, t.SubjectId, t.DeadlineAt, t.IsArchived, color, status);
 }

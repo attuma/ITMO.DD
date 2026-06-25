@@ -40,4 +40,12 @@ public class TaskRepository : ITaskRepository
     {
         await _db.SaveChangesAsync();
     }
+
+    // весь прогресс пользователя (по всем его задачам)
+    public async Task<List<TaskProgress>> GetProgressByUserAsync(int userId)
+    {
+        return await _db.TaskProgress
+            .Where(p => p.UserId == userId)
+            .ToListAsync();
+    }
 }

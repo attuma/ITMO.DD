@@ -7,4 +7,7 @@ public interface ITaskRepository
     Task<TaskItem?> GetByIdAsync(int taskId);
     Task AddAsync(TaskItem task);
     Task SaveChangesAsync();
+
+    // прогресс пользователя по его задачам (для статуса/галочки в календаре)
+    Task<List<TaskProgress>> GetProgressByUserAsync(int userId);
 }

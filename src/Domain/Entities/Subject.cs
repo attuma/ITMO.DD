@@ -4,16 +4,21 @@ namespace StudentTracker.Domain.Entities;
 
 public class Subject : BaseEntity
 {
+    // цвет по умолчанию, если не задан явно (серый)
+    public const string DefaultColor = "#808080";
+
     public string SubjectName { get; private set; }
     public string? Description { get; private set; }
     public int? OwnerUserId { get; private set; }
     public int? OwnerGroupId { get; private set; }
     public bool IsArchived { get; private set; }
     public bool IsDefault { get; private set; }
+    public string Color { get; private set; }
 
     private Subject()
     {
         SubjectName = string.Empty;
+        Color = DefaultColor;
     }
 
     public Subject(
@@ -21,7 +26,8 @@ public class Subject : BaseEntity
         string? description,
         int? ownerUserId,
         int? ownerGroupId,
-        bool isDefault = false)
+        bool isDefault = false,
+        string? color = null)
     {
         if (string.IsNullOrWhiteSpace(subjectName))
             throw new ArgumentException("Subject name cannot be empty.", nameof(subjectName));
@@ -34,22 +40,23 @@ public class Subject : BaseEntity
         OwnerGroupId = ownerGroupId;
         IsDefault = isDefault;
         IsArchived = false;
+        Color = string.IsNullOrWhiteSpace(color) ? DefaultColor : color;
     }
 
-    public static Subject CreateForUser(string subjectName, string? description, int ownerUserId, bool isDefault = false)
+    public static Subject CreateForUser(string subjectName, string? description, int ownerUserId, bool isDefault = false, string? color = null)
     {
         if (ownerUserId <= 0)
             throw new ArgumentOutOfRangeException(nameof(ownerUserId));
 
-        return new Subject(subjectName, description, ownerUserId, null, isDefault);
+        return new Subject(subjectName, description, ownerUserId, null, isDefault, color);
     }
 
-    public static Subject CreateForGroup(string subjectName, string? description, int ownerGroupId)
+    public static Subject CreateForGroup(string subjectName, string? description, int ownerGroupId, string? color = null)
     {
         if (ownerGroupId <= 0)
             throw new ArgumentOutOfRangeException(nameof(ownerGroupId));
 
-        return new Subject(subjectName, description, null, ownerGroupId);
+        return new Subject(subjectName, description, null, ownerGroupId, false, color);
     }
 
     public void Archive()

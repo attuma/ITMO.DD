@@ -20,12 +20,12 @@ public class SubjectService : ISubjectService
     public async Task<SubjectResponse> CreateAsync(SubjectRequest request, int userId)
     {
         // CreateForUser - XOR правило: предмет принадлежит либо пользователю либо группе
-        var subject = Subject.CreateForUser(request.SubjectName, request.Description, userId);
+        var subject = Subject.CreateForUser(request.SubjectName, request.Description, userId, color: request.Color);
 
         await _subjectRepository.AddAsync(subject);
         await _subjectRepository.SaveChangesAsync();
 
-        return new SubjectResponse(subject.Id, subject.SubjectName, subject.Description, subject.IsArchived);
+        return Map(subject);
     }
 
     public async Task<List<SubjectResponse>> GetUserSubjectsAsync(int userId)
@@ -33,9 +33,7 @@ public class SubjectService : ISubjectService
         var subjects = await _subjectRepository.GetByUserIdAsync(userId);
 
         // превращаем каждый Subject в SubjectResponse
-        return subjects
-            .Select(s => new SubjectResponse(s.Id, s.SubjectName, s.Description, s.IsArchived))
-            .ToList();
+        return subjects.Select(Map).ToList();
     }
 
     // CreateForGroupAsync — создаёт предмет для группы, только для участников группы
@@ -44,11 +42,11 @@ public class SubjectService : ISubjectService
         var membership = await _groupMembershipRepository.GetByUserAndGroupAsync(userId, groupId);
         if (membership == null) throw new ForbiddenException("Access denied");
 
-        var subject = Subject.CreateForGroup(request.SubjectName, request.Description, groupId);
+        var subject = Subject.CreateForGroup(request.SubjectName, request.Description, groupId, request.Color);
         await _subjectRepository.AddAsync(subject);
         await _subjectRepository.SaveChangesAsync();
 
-        return new SubjectResponse(subject.Id, subject.SubjectName, subject.Description, subject.IsArchived);
+        return Map(subject);
     }
 
     // GetGroupSubjectsAsync — возвращает все предметы группы, только для участников
@@ -58,8 +56,9 @@ public class SubjectService : ISubjectService
         if (membership == null) throw new ForbiddenException("Access denied");
 
         var subjects = await _subjectRepository.GetByGroupIdAsync(groupId);
-        return subjects
-            .Select(s => new SubjectResponse(s.Id, s.SubjectName, s.Description, s.IsArchived))
-            .ToList();
+        return subjects.Select(Map).ToList();
     }
+
+    private static SubjectResponse Map(Subject s) =>
+        new(s.Id, s.SubjectName, s.Description, s.IsArchived, s.Color);
 }
