@@ -94,6 +94,13 @@ public class CalendarViewModel : BaseViewModel
         _ = LoadSummaryAsync();  // и заполнить счётчики
     }
 
+    // перечитать данные (после создания задачи): текущий месяц + счётчики
+    public async Task RefreshAsync()
+    {
+        await LoadMonthAsync();
+        await LoadSummaryAsync();
+    }
+
     // счётчики не зависят от показанного месяца — грузим один раз
     private async Task LoadSummaryAsync()
     {

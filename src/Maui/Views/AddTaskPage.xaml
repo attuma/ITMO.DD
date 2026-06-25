@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="itmodd.Views.AddTaskPage"
+             BackgroundColor="#000000">
+
+    <ContentPage.Resources>
+        <Color x:Key="Surface">#1C1C1E</Color>
+        <Color x:Key="Field">#2C2C2E</Color>
+        <Color x:Key="Separator">#38383A</Color>
+        <Color x:Key="TextPrimary">#FFFFFF</Color>
+        <Color x:Key="TextSecondary">#8E8E93</Color>
+        <Color x:Key="Accent">#0A84FF</Color>
+        <Color x:Key="Red">#FF453A</Color>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <!-- шапка -->
+            <Grid ColumnDefinitions="Auto,*,Auto" VerticalOptions="Center">
+                <Button Grid.Column="0" Text="Отмена" Clicked="OnCancelClicked"
+                        BackgroundColor="Transparent" TextColor="{StaticResource TextSecondary}" Padding="0" />
+                <Label Grid.Column="1" Text="Новая задача"
+                       FontSize="18" FontAttributes="Bold"
+                       TextColor="{StaticResource TextPrimary}" HorizontalOptions="Center" />
+            </Grid>
+
+            <!-- название -->
+            <Label Text="Название" FontSize="12" TextColor="{StaticResource TextSecondary}" />
+            <Entry Text="{Binding Title}" Placeholder="Что нужно сделать"
+                   TextColor="{StaticResource TextPrimary}" PlaceholderColor="{StaticResource TextSecondary}"
+                   BackgroundColor="{StaticResource Field}" />
+
+            <!-- предмет -->
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Grid.Column="0" Text="Предмет" FontSize="12" TextColor="{StaticResource TextSecondary}" VerticalOptions="Center" />
+                <Button Grid.Column="1" Text="+ Новый предмет" Command="{Binding ToggleNewSubjectCommand}"
+                        BackgroundColor="Transparent" TextColor="{StaticResource Accent}" FontSize="12" Padding="0" />
+            </Grid>
+            <Picker ItemsSource="{Binding Subjects}"
+                    SelectedItem="{Binding SelectedSubject}"
+                    ItemDisplayBinding="{Binding SubjectName}"
+                    Title="Выбери предмет"
+                    TextColor="{StaticResource TextPrimary}"
+                    TitleColor="{StaticResource TextSecondary}"
+                    BackgroundColor="{StaticResource Field}" />
+
+            <!-- создание нового предмета -->
+            <Border IsVisible="{Binding ShowNewSubject}"
+                    BackgroundColor="{StaticResource Surface}" Stroke="{StaticResource Separator}"
+                    StrokeThickness="1" Padding="12">
+                <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
+                <VerticalStackLayout Spacing="10">
+                    <Entry Text="{Binding NewSubjectName}" Placeholder="Название предмета"
+                           TextColor="{StaticResource TextPrimary}" PlaceholderColor="{StaticResource TextSecondary}"
+                           BackgroundColor="{StaticResource Field}" />
+
+                    <Label Text="Цвет" FontSize="12" TextColor="{StaticResource TextSecondary}" />
+                    <CollectionView ItemsSource="{Binding AvailableColors}"
+                                    SelectedItem="{Binding SelectedColor}"
+                                    SelectionMode="Single"
+                                    HeightRequest="44">
+                        <CollectionView.ItemsLayout>
+                            <LinearItemsLayout Orientation="Horizontal" ItemSpacing="10" />
+                        </CollectionView.ItemsLayout>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <Border WidthRequest="32" HeightRequest="32" Padding="0"
+                                        BackgroundColor="{Binding ., Converter={StaticResource StringToColor}}"
+                                        Stroke="Transparent" StrokeThickness="3">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="16" /></Border.StrokeShape>
+                                    <VisualStateManager.VisualStateGroups>
+                                        <VisualStateGroup x:Name="CommonStates">
+                                            <VisualState x:Name="Normal" />
+                                            <VisualState x:Name="Selected">
+                                                <VisualState.Setters>
+                                                    <Setter Property="Stroke" Value="White" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateManager.VisualStateGroups>
+                                </Border>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Button Text="Создать предмет" Command="{Binding CreateSubjectCommand}"
+                            BackgroundColor="{StaticResource Accent}" TextColor="White"
+                            CornerRadius="10" HeightRequest="40" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- дедлайн -->
+            <Label Text="Дедлайн" FontSize="12" TextColor="{StaticResource TextSecondary}" />
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <DatePicker Grid.Column="0" Date="{Binding DeadlineDate}"
+                            TextColor="{StaticResource TextPrimary}" BackgroundColor="{StaticResource Field}" />
+                <TimePicker Grid.Column="1" Time="{Binding DeadlineTime}"
+                            TextColor="{StaticResource TextPrimary}" BackgroundColor="{StaticResource Field}" />
+            </Grid>
+
+            <!-- описание -->
+            <Label Text="Описание (необязательно)" FontSize="12" TextColor="{StaticResource TextSecondary}" />
+            <Editor Text="{Binding Description}" Placeholder="Заметки к задаче"
+                    HeightRequest="80" AutoSize="Disabled"
+                    TextColor="{StaticResource TextPrimary}" PlaceholderColor="{StaticResource TextSecondary}"
+                    BackgroundColor="{StaticResource Field}" />
+
+            <!-- ошибка -->
+            <Label Text="{Binding ErrorMessage}" IsVisible="{Binding HasError}"
+                   TextColor="{StaticResource Red}" FontSize="13" />
+
+            <!-- сохранить -->
+            <Button Text="Сохранить задачу" Command="{Binding SaveCommand}"
+                    BackgroundColor="{StaticResource Accent}" TextColor="White"
+                    CornerRadius="12" HeightRequest="50" Margin="0,4,0,0" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                               Color="{StaticResource Accent}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
