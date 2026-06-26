@@ -32,6 +32,12 @@ public class GroupConfiguration: IEntityTypeConfiguration<Group>
             .OnDelete(DeleteBehavior.Restrict);
 
 
+        builder.Property(g => g.JoinCode)
+            .HasColumnName("join_code")
+            .HasMaxLength(8)
+            .IsRequired();
+        builder.HasIndex(g => g.JoinCode).IsUnique();
+
         builder.Property(g => g.IsArchived)
             .HasColumnName("is_archived")
             .IsRequired();

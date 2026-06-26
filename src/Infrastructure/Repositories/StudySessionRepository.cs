@@ -38,6 +38,26 @@ public class StudySessionRepository : IStudySessionRepository
             .Where(s => s.SessionStatus == Domain.Enums.StudySessionStatus.Completed && s.StartedAt >= from)
             .ToListAsync();
 
+    // сумма секунд учёбы за сегодня (UTC): завершённые + текущая активная
+    public async Task<long> GetTodaySecondsAsync(int userId)
+    {
+        var todayUtc = DateTime.UtcNow.Date;
+        var sessions = await _db.StudySessions
+            .Where(s => s.UserId == userId && s.StartedAt >= todayUtc)
+            .ToListAsync();
+
+        var now = DateTime.UtcNow;
+        long total = 0;
+        foreach (var s in sessions)
+        {
+            var end = s.EndedAt ?? now;
+            var duration = end - s.StartedAt;
+            if (duration.TotalSeconds > 0)
+                total += (long)duration.TotalSeconds;
+        }
+        return total;
+    }
+
     public async Task AddAsync(StudySession session)
         => await _db.StudySessions.AddAsync(session);
 

@@ -8,10 +8,12 @@ public class Group : BaseEntity
     public string? Description { get; private set; }
     public bool IsArchived { get; private set; }
     public int OwnerUserId { get; private set; }
+    public string JoinCode { get; private set; }
 
     private Group()
     {
         GroupName = string.Empty;
+        JoinCode = string.Empty;
     }
 
     public Group(string groupName, string? description, int ownerUserId)
@@ -26,6 +28,7 @@ public class Group : BaseEntity
         Description = description;
         OwnerUserId = ownerUserId;
         IsArchived = false;
+        JoinCode = Guid.NewGuid().ToString("N")[..8].ToUpper();
     }
 
     public void Archive()

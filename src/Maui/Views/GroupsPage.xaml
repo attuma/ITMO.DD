@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="itmodd.Views.GroupsPage"
+             Title="Группы"
+             BackgroundColor="#000000"
+             Shell.BackgroundColor="#000000"
+             Shell.TitleColor="#FFFFFF"
+             Shell.ForegroundColor="#FFFFFF">
+
+    <ContentPage.Resources>
+        <Color x:Key="Surface">#1C1C1E</Color>
+        <Color x:Key="TextPrimary">#FFFFFF</Color>
+        <Color x:Key="TextSecondary">#8E8E93</Color>
+        <Color x:Key="Accent">#0A84FF</Color>
+        <Color x:Key="ErrorColor">#FF453A</Color>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Padding="16" RowSpacing="10">
+
+        <!-- кнопка создать группу -->
+        <Button Grid.Row="0" Text="+ Создать группу"
+                Command="{Binding CreateCommand}"
+                BackgroundColor="{StaticResource Surface}"
+                TextColor="{StaticResource TextPrimary}"
+                CornerRadius="12" HeightRequest="48"
+                FontSize="15" HorizontalOptions="Fill" />
+
+        <!-- поле ввода кода + кнопка вступить -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="10">
+            <Border Grid.Column="0" BackgroundColor="{StaticResource Surface}"
+                    Stroke="Transparent" Padding="14,0">
+                <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
+                <Entry Placeholder="Код группы (напр. AB12CD34)"
+                       PlaceholderColor="{StaticResource TextSecondary}"
+                       TextColor="{StaticResource TextPrimary}"
+                       Text="{Binding JoinCode}"
+                       HeightRequest="48"
+                       BackgroundColor="Transparent"
+                       FontSize="15" />
+            </Border>
+            <Button Grid.Column="1" Text="Вступить"
+                    Command="{Binding JoinCommand}"
+                    BackgroundColor="{StaticResource Accent}"
+                    TextColor="{StaticResource TextPrimary}"
+                    CornerRadius="12" HeightRequest="48"
+                    FontAttributes="Bold" FontSize="15" />
+        </Grid>
+
+        <!-- ошибка -->
+        <Label Grid.Row="2" Text="{Binding Error}"
+               TextColor="{StaticResource ErrorColor}" FontSize="13"
+               IsVisible="{Binding HasError}"
+               Margin="4,0,0,0" />
+
+        <!-- список групп -->
+        <CollectionView Grid.Row="3" ItemsSource="{Binding Groups}">
+            <CollectionView.EmptyView>
+                <Label Text="Ты пока не в группе. Введи код выше, чтобы вступить."
+                       FontSize="14" TextColor="{StaticResource TextSecondary}"
+                       HorizontalOptions="Center" VerticalOptions="Center"
+                       HorizontalTextAlignment="Center" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Margin="0,4" Padding="16,14"
+                            BackgroundColor="{StaticResource Surface}"
+                            Stroke="Transparent">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="14" /></Border.StrokeShape>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.OpenGroupCommand}"
+                                                  CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                            <StackLayout Grid.Column="0" Spacing="4">
+                                <Label Text="{Binding GroupName}"
+                                       FontSize="17" FontAttributes="Bold"
+                                       TextColor="{StaticResource TextPrimary}" />
+                                <Label FontSize="13" TextColor="{StaticResource TextSecondary}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="Код: " />
+                                            <Span Text="{Binding JoinCode}" FontAttributes="Bold" />
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </StackLayout>
+                            <Label Grid.Column="1" Text="›"
+                                   FontSize="22" TextColor="{StaticResource TextSecondary}"
+                                   VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+
+</ContentPage>

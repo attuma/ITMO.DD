@@ -8,6 +8,7 @@ public interface IStudySessionRepository
     Task<List<StudySession>> GetByUserIdAsync(int userId);
     Task<StudySession?> GetActiveByUserIdAsync(int userId);
     Task<List<StudySession>> GetCompletedSinceAsync(DateTime from);
+    Task<long> GetTodaySecondsAsync(int userId);
     Task AddAsync(StudySession session);
     Task SaveChangesAsync();
 }

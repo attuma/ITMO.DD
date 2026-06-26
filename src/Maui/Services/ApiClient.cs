@@ -186,6 +186,99 @@ public class ApiClient : IApiClient
         }
     }
 
+    // ===== группы =====
+
+    public async Task<(GroupApiResponse? group, string? error)> CreateGroupAsync(string groupName)
+    {
+        try
+        {
+            using var req = Authorized(HttpMethod.Post, "/groups");
+            req.Content = JsonContent.Create(new { groupName, description = (string?)null });
+            using var resp = await _http.SendAsync(req);
+            if (resp.IsSuccessStatusCode)
+                return (await resp.Content.ReadFromJsonAsync<GroupApiResponse>(Json), null);
+
+            return (null, await ReadErrorAsync(resp));
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ApiClient] POST /groups: {ex.Message}");
+            return (null, "Не удалось связаться с сервером");
+        }
+    }
+
+    public async Task<IReadOnlyList<GroupApiResponse>> GetGroupsAsync()
+    {
+        try
+        {
+            using var req = Authorized(HttpMethod.Get, "/groups");
+            using var resp = await _http.SendAsync(req);
+            if (!resp.IsSuccessStatusCode)
+                return Array.Empty<GroupApiResponse>();
+
+            return await resp.Content.ReadFromJsonAsync<List<GroupApiResponse>>(Json)
+                   ?? new List<GroupApiResponse>();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ApiClient] GET /groups: {ex.Message}");
+            return Array.Empty<GroupApiResponse>();
+        }
+    }
+
+    public async Task<(GroupApiResponse? group, string? error)> JoinGroupAsync(string joinCode)
+    {
+        try
+        {
+            using var req = Authorized(HttpMethod.Post, "/groups/join");
+            req.Content = JsonContent.Create(new { joinCode });
+            using var resp = await _http.SendAsync(req);
+            if (resp.IsSuccessStatusCode)
+                return (await resp.Content.ReadFromJsonAsync<GroupApiResponse>(Json), null);
+
+            return (null, await ReadErrorAsync(resp));
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ApiClient] POST /groups/join: {ex.Message}");
+            return (null, "Не удалось связаться с сервером");
+        }
+    }
+
+    public async Task<IReadOnlyList<GroupMemberApiResponse>> GetGroupMembersAsync(int groupId)
+    {
+        try
+        {
+            using var req = Authorized(HttpMethod.Get, $"/groups/{groupId}/members");
+            using var resp = await _http.SendAsync(req);
+            if (!resp.IsSuccessStatusCode)
+                return Array.Empty<GroupMemberApiResponse>();
+
+            return await resp.Content.ReadFromJsonAsync<List<GroupMemberApiResponse>>(Json)
+                   ?? new List<GroupMemberApiResponse>();
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ApiClient] GET /groups/{groupId}/members: {ex.Message}");
+            return Array.Empty<GroupMemberApiResponse>();
+        }
+    }
+
+    public async Task<bool> ArchiveGroupAsync(int groupId)
+    {
+        try
+        {
+            using var req = Authorized(HttpMethod.Post, $"/groups/{groupId}/archive");
+            using var resp = await _http.SendAsync(req);
+            return resp.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"[ApiClient] POST /groups/{groupId}/archive: {ex.Message}");
+            return false;
+        }
+    }
+
     /// <summary>
     /// Собирает HTTP-запрос и, если в <see cref="IAuthService"/> есть токен,
     /// добавляет заголовок <c>Authorization: Bearer &lt;jwt&gt;</c>.

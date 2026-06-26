@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using itmodd.Services;
+using itmodd.ViewModels;
+using itmodd.Views;
 
 namespace itmodd;
 
@@ -24,6 +26,12 @@ public static class MauiProgram
 
 		// клиент API для создания задач и работы с предметами
 		builder.Services.AddSingleton<IApiClient, ApiClient>();
+
+		// экраны и VM для групп
+		builder.Services.AddTransient<GroupsViewModel>();
+		builder.Services.AddTransient<GroupsPage>();
+		builder.Services.AddTransient<GroupDetailViewModel>();
+		builder.Services.AddTransient<GroupDetailPage>();
 
 		// источник данных календаря.
 		// ApiCalendarDataService — живые данные (нужен JWT в ApiConfig.Token и запущенный API).

@@ -22,4 +22,9 @@
         ContentTemplate="{DataTemplate views:LeaderboardPage}"
         Route="LeaderboardPage" />
 
+    <ShellContent
+        Title="Группы"
+        ContentTemplate="{DataTemplate views:GroupsPage}"
+        Route="GroupsPage" />
+
 </Shell>

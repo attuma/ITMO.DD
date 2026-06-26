@@ -36,4 +36,21 @@ public interface IApiClient
 
     /// <summary>Топ пользователей за период. <paramref name="period"/>: daily | weekly | monthly.</summary>
     Task<IReadOnlyList<LeaderboardEntryResponse>> GetLeaderboardAsync(string period);
+
+    // ===== группы =====
+
+    /// <summary>Список групп пользователя.</summary>
+    Task<IReadOnlyList<GroupApiResponse>> GetGroupsAsync();
+
+    /// <summary>Создать группу. null = успех, иначе текст ошибки.</summary>
+    Task<(GroupApiResponse? group, string? error)> CreateGroupAsync(string groupName);
+
+    /// <summary>Вступить в группу по коду. null = успех, иначе текст ошибки.</summary>
+    Task<(GroupApiResponse? group, string? error)> JoinGroupAsync(string joinCode);
+
+    /// <summary>Участники группы с признаком «учится сейчас» и временем за сегодня.</summary>
+    Task<IReadOnlyList<GroupMemberApiResponse>> GetGroupMembersAsync(int groupId);
+
+    /// <summary>Архивировать группу (только лидер). true = успех.</summary>
+    Task<bool> ArchiveGroupAsync(int groupId);
 }

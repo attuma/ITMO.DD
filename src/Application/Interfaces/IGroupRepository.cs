@@ -6,6 +6,7 @@ namespace StudentTracker.Application.Interfaces;
 public interface IGroupRepository
 {
     Task<Group?> GetByIdAsync(int id);
+    Task<Group?> GetByJoinCodeAsync(string joinCode);
     Task<List<Group>> GetByUserIdAsync(int userId);
     Task<List<Group>> GetGroupsByMemberAsync(int userId);
     Task AddAsync(Group group);

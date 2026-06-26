@@ -12,12 +12,14 @@ public class GroupService : IGroupService
     private readonly IGroupRepository _groupRepository;
     private readonly IGroupMembershipRepository _groupMembershipRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IStudySessionRepository _sessionRepository;
 
-    public GroupService(IGroupRepository groupRepository, IGroupMembershipRepository groupMembershipRepository, IUserRepository userRepository)
+    public GroupService(IGroupRepository groupRepository, IGroupMembershipRepository groupMembershipRepository, IUserRepository userRepository, IStudySessionRepository sessionRepository)
     {
         _groupRepository = groupRepository;
         _groupMembershipRepository = groupMembershipRepository;
         _userRepository = userRepository;
+        _sessionRepository = sessionRepository;
     }
 
     // CreateAsync — создаёт группу и добавляет создателя как GroupOwner
@@ -25,20 +27,23 @@ public class GroupService : IGroupService
     {
         var group = new Group(request.GroupName, request.Description, userId);
         await _groupRepository.AddAsync(group);
-        // триггер trg_add_group_owner автоматически добавит создателя в group_memberships
         await _groupRepository.SaveChangesAsync();
 
-        return new GroupResponse(group.Id, group.GroupName, group.CreatedAt);
+        var membership = new GroupMembership(group.Id, userId, GroupRole.GroupOwner);
+        await _groupMembershipRepository.AddAsync(membership);
+        await _groupMembershipRepository.SaveChangesAsync();
+
+        return new GroupResponse(group.Id, group.GroupName, group.JoinCode, group.CreatedAt);
     }
 
-    // JoinAsync — добавляет пользователя в группу как Member
+    // JoinAsync — добавляет пользователя в группу по коду
     public async Task<GroupResponse> JoinAsync(JoinGroupRequest request, int userId)
     {
-        var group = await _groupRepository.GetByIdAsync(request.GroupId);
+        var group = await _groupRepository.GetByJoinCodeAsync(request.JoinCode);
         if (group == null) throw new NotFoundException("Group not found");
 
         // ищем любую запись — активную или с LeftAt (вышел раньше)
-        var existing = await _groupMembershipRepository.GetByUserAndGroupIncludingLeftAsync(userId, request.GroupId);
+        var existing = await _groupMembershipRepository.GetByUserAndGroupIncludingLeftAsync(userId, group.Id);
 
         if (existing != null && existing.LeftAt == null)
             throw new ConflictException("Already a member");
@@ -50,13 +55,24 @@ public class GroupService : IGroupService
         }
         else
         {
-            var membership = new GroupMembership(request.GroupId, userId, GroupRole.Member);
+            var membership = new GroupMembership(group.Id, userId, GroupRole.Member);
             await _groupMembershipRepository.AddAsync(membership);
         }
 
         await _groupMembershipRepository.SaveChangesAsync();
 
-        return new GroupResponse(group.Id, group.GroupName, group.CreatedAt);
+        return new GroupResponse(group.Id, group.GroupName, group.JoinCode, group.CreatedAt);
+    }
+
+    // ArchiveAsync — архивирует группу (is_archived = true), только владелец
+    public async Task ArchiveAsync(int groupId, int userId)
+    {
+        var group = await _groupRepository.GetByIdAsync(groupId);
+        if (group == null) throw new NotFoundException("Group not found");
+        if (group.OwnerUserId != userId) throw new ForbiddenException("Only the group owner can archive the group");
+
+        group.Archive();
+        await _groupRepository.SaveChangesAsync();
     }
 
     // LeaveAsync — удаляет пользователя из группы через метод Domain
@@ -69,7 +85,7 @@ public class GroupService : IGroupService
         await _groupMembershipRepository.SaveChangesAsync();
     }
 
-    // GetMembersAsync — возвращает список участников группы с именами
+    // GetMembersAsync — возвращает участников с признаком "учится сейчас" и временем за сегодня
     public async Task<List<MemberResponse>> GetMembersAsync(int groupId)
     {
         var memberships = await _groupMembershipRepository.GetByGroupIdAsync(groupId);
@@ -78,8 +94,13 @@ public class GroupService : IGroupService
         foreach (var m in memberships)
         {
             var user = await _userRepository.GetByIdAsync(m.UserId);
-            if (user != null)
-                result.Add(new MemberResponse(m.UserId, user.UserName, m.GroupRole));
+            if (user == null) continue;
+
+            var activeSession = await _sessionRepository.GetActiveByUserIdAsync(m.UserId);
+            var isStudying = activeSession?.SessionStatus == Domain.Enums.StudySessionStatus.Active;
+            var todaySeconds = await _sessionRepository.GetTodaySecondsAsync(m.UserId);
+
+            result.Add(new MemberResponse(m.UserId, user.UserName, m.GroupRole, isStudying, todaySeconds));
         }
         return result;
     }
@@ -89,7 +110,7 @@ public class GroupService : IGroupService
     {
         var groups = await _groupRepository.GetGroupsByMemberAsync(userId);
         return groups
-            .Select(g => new GroupResponse(g.Id, g.GroupName, g.CreatedAt))
+            .Select(g => new GroupResponse(g.Id, g.GroupName, g.JoinCode, g.CreatedAt))
             .ToList();
     }
 }

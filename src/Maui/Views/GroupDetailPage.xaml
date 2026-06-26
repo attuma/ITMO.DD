@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="itmodd.Views.GroupDetailPage"
+             Title="{Binding GroupName}"
+             BackgroundColor="#000000"
+             Shell.BackgroundColor="#000000"
+             Shell.TitleColor="#FFFFFF"
+             Shell.ForegroundColor="#FFFFFF">
+
+    <ContentPage.Resources>
+        <Color x:Key="Surface">#1C1C1E</Color>
+        <Color x:Key="SurfaceLeader">#1A2A1A</Color>
+        <Color x:Key="TextPrimary">#FFFFFF</Color>
+        <Color x:Key="TextSecondary">#8E8E93</Color>
+        <Color x:Key="Accent">#0A84FF</Color>
+        <Color x:Key="LeaderAccent">#30D158</Color>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*" Padding="16" RowSpacing="14">
+
+        <!-- код группы + кнопка удаления для лидера -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="10">
+            <Border Grid.Column="0" BackgroundColor="{StaticResource Surface}"
+                    Stroke="Transparent" Padding="16,12">
+                <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
+                <Label Text="{Binding JoinCodeText}"
+                       FontSize="15" TextColor="{StaticResource TextSecondary}"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </Border>
+            <Button Grid.Column="1" Text="Удалить группу"
+                    Command="{Binding ArchiveCommand}"
+                    IsVisible="{Binding IsCurrentUserLeader}"
+                    BackgroundColor="#3A1A1A"
+                    TextColor="#FF453A"
+                    CornerRadius="12" HeightRequest="48"
+                    FontSize="13" FontAttributes="Bold" />
+        </Grid>
+
+        <!-- участники -->
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Members}">
+            <CollectionView.EmptyView>
+                <Label Text="Нет участников"
+                       FontSize="14" TextColor="{StaticResource TextSecondary}"
+                       HorizontalOptions="Center" VerticalOptions="Center" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Margin="0,4" Padding="16,14"
+                            BackgroundColor="{StaticResource Surface}"
+                            Stroke="Transparent" StrokeThickness="1.5">
+                        <Border.StrokeShape><RoundRectangle CornerRadius="14" /></Border.StrokeShape>
+                        <!-- зелёная рамка для лидера -->
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsLeader}" Value="True">
+                                <Setter Property="Stroke" Value="{StaticResource LeaderAccent}" />
+                                <Setter Property="BackgroundColor" Value="{StaticResource SurfaceLeader}" />
+                            </DataTrigger>
+                        </Border.Triggers>
+
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <!-- иконка учёбы / лидера -->
+                            <StackLayout Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalOptions="Center">
+                                <Label Text="{Binding LeaderBadge}" FontSize="18" IsVisible="{Binding IsLeader}" />
+                                <Label Text="{Binding StudyingBadge}" FontSize="14" VerticalOptions="Center" />
+                            </StackLayout>
+
+                            <!-- имя -->
+                            <Label Grid.Column="1" Text="{Binding Username}"
+                                   FontSize="16" FontAttributes="Bold"
+                                   TextColor="{StaticResource TextPrimary}"
+                                   VerticalOptions="Center" />
+
+                            <!-- время сегодня -->
+                            <Label Grid.Column="2" Text="{Binding TodayTimeText}"
+                                   FontSize="14" TextColor="{StaticResource Accent}"
+                                   FontAttributes="Bold"
+                                   VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+
+</ContentPage>

@@ -10,19 +10,24 @@ using StudentTracker.Infrastructure.Persistence;
 using StudentTracker.Infrastructure.Repositories;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json.Serialization;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+// enum сериализуются как строки 
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 // подключение к PostgreSQL через строку из appsettings.json
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Swagger — интерфейс для тестирования API
+// Swagger 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    // добавляем кнопку Authorize в Swagger для JWT токена
+    // Authorize в Swagger для JWT токена
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -63,7 +68,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// регистрация сервисов в DI — говорим какой интерфейс = какой класс
+// регистрация сервисов в DI: какой интерфейс к какому класс
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -78,7 +83,7 @@ builder.Services.AddScoped<IGroupMembershipRepository, GroupMembershipRepository
 builder.Services.AddScoped<IGroupService, GroupService>();
 builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 
-// Redis — кэш для лидерборда
+// Redis лидерборда
 builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration["Redis"]);
 
@@ -239,12 +244,20 @@ app.MapPost("/groups", async (CreateGroupRequest request, IGroupService groupSer
     return Results.Created($"/groups/{result.Id}", result);
 }).RequireAuthorization();
 
-// POST /groups/{id}/join — вступить в группу
-app.MapPost("/groups/{id}/join", async (int id, IGroupService groupService, ClaimsPrincipal user) =>
+// POST /groups/join — вступить в группу по коду
+app.MapPost("/groups/join", async (JoinGroupRequest request, IGroupService groupService, ClaimsPrincipal user) =>
 {
     var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
-    var result = await groupService.JoinAsync(new JoinGroupRequest(id), userId);
+    var result = await groupService.JoinAsync(request, userId);
     return Results.Ok(result);
+}).RequireAuthorization();
+
+// POST /groups/{id}/archive — архивировать группу (только владелец)
+app.MapPost("/groups/{id}/archive", async (int id, IGroupService groupService, ClaimsPrincipal user) =>
+{
+    var userId = int.Parse(user.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    await groupService.ArchiveAsync(id, userId);
+    return Results.NoContent();
 }).RequireAuthorization();
 
 // POST /groups/{id}/leave — выйти из группы
